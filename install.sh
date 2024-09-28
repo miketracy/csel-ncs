@@ -10,6 +10,12 @@ fi
 source ./helpers.sh
 source ./config.sh
 
+echo "create readme"
+pandoc -f markdown -t html simple_README.md -o simple_README.html --css=pandoc.css --self-contained
+
+echo "copy readme to ${location}"
+cp -f simple_README.html ${location}
+
 echo "create executable"
 cat helpers.sh config.sh scoring.sh | sed 's/^source.*//g' > simple_score
 
