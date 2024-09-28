@@ -1,0 +1,479 @@
+#!/usr/bin/env bash
+
+location="/home/campy/Desktop/"
+total_points=0
+declare -a results
+
+#declare -A admins_auth
+#declare -A admins_unauth
+#declare -A apps_required
+#declare -A apps_remove
+# lightdm settings
+
+# ablist where a = ugasz (user,group,application,service,administrator)
+#              b = acn (authorized,create,not authorized)
+ualist="campy,barry,carry,garry,harry,jerry,kerri,larry,mary,perry,terry" #,jennifer"
+uclist="jennifer"
+unlist="inky,pinky,blinky,clyde"
+gclist="warriors,noobs"
+aalist="firefox,thunderbird"
+aclist="ruby,x2goserver,openssh-server"
+anlist="nginx,wireshark,vsftpd,aisleriot,qbittorrent,ophcrack"
+salist="sshd"
+snlist="nginx,vsftpd"
+zalist="campy,barry,larry"
+znlist="garry"
+contraband_location="/home/garry/Music/"
+
+# special case. these users belong in this group.
+declare -A addtogroup
+addtogroup=(
+  [points]=5
+  [name]="warriors"
+  [list]="jennifer,barry,removeme"
+)
+
+declare -A contraband_files=(
+  [points]=3
+  [text]="Contraband file has been removed"
+  [location]="${contraband_location}"
+  [files]="bad-image.png,some-movie.mp4,some-song.mp3"
+)
+
+declare -A apps_upgrade=(
+  [points]=4
+  [text]="Package has been updated"
+  [list]="${aalist}"
+)
+
+declare -A apps_install=(
+  [points]=4
+  [text]="Required package has been installed"
+  [list]="${aclist}"
+)
+
+declare -A svcs_unauth=(
+  [points]=6
+  [text]="Unauthorized servive is not running"
+  [list]="${snlist}"
+)
+
+declare -A apps_unauth=(
+  [points]=6
+  [text]="Unauthorized application has been removed"
+  [list]="${anlist}"
+)
+
+declare -A svcs_auth=(
+  [points]=-6
+  [text]="Critical service is not running"
+  [list]="${salist}"
+)
+
+declare -A apps_auth=(
+  [points]=-6
+  [text]="Critical application has been removed"
+  [list]="${aalist}"
+)
+
+declare -A admins_auth=(
+  [points]=-6
+  [text]="Authorized administrator has been removed"
+  [list]="${zalist}"
+)
+
+declare -A admins_unauth=(
+  [points]=6
+  [text]="Unauthorized administrator has been removed"
+  [list]="${znlist}"
+)
+
+declare -A users_auth
+users_auth=(
+  [points]=-6
+  [text]="Authorized user has been removed"
+  [list]="${ualist}"
+)
+
+declare -A users_unauth
+users_unauth=(
+  [points]=6
+  [text]="Unauthorized user has been removed"
+  [list]="${unlist}"
+)
+
+declare -A groups_add
+groups_add=(
+  [points]=4
+  [text]="Required group has been created"
+  [list]="${gclist}"
+)
+
+declare -A policy
+policy=(
+  [points]=5
+  [updates]="System updates are current"
+  [pwage]="A secure password age exists"
+  [pwquality]="Password quality has been configured"
+  [pwhistory]="A secure password history has been configured"
+  [pwminlen]="A secure password minimum length exists"
+  [permitroot]="Root logins via ssh have been disabled"
+  [pwnullok]="Null password logins are disabled"
+  [fwactive]="UFW firewall is enabled and running"
+)
+#!/usr/bin/env bash
+
+debug () {
+  echo "$@" >&2
+}
+
+# hack to create a global variable with an array parsed from a csv list
+# global: __list
+# pass: csv string (no spaces between entries)
+csv2arr () {
+  line=$1
+#  debug $line
+#  declare -a ret
+  readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
+#  readarray -d ',' -t ret < <(printf $line) # use printf to prevent trailing \n
+#  echo "${ret[@]}"
+}
+
+# pass $packagename
+# return:
+#   2 = not installed
+#   1 = installed and not upgradble
+#   0 = installed and upgradable
+is_upgradable () {
+  $(is_installed $1)
+  insret=$?
+  [[ $insret -eq 1 ]] && return 2
+  ret=$(apt list --upgradable 2>/dev/null | grep ^$1)
+  upgret=$?
+  return $upgret
+}
+
+#pass $packagename
+is_installed () {
+# this is as hacky as it gets and I hate it
+  ret=$(tail -1 <(dpkg -l $1 2>&1) |\
+     tr -s " " | cut -f3 -d" " | grep -E -o -e "packages" -e "<none>")
+  if [[ $? -eq 0 ]]; then
+    return 1
+  else
+    return 0
+  fi
+#  echo $?
+}
+
+# pass $username
+exist_admin () {
+  ret=$(getent group sudo | grep -E -o $1)
+  echo $?
+}
+
+# pass $username
+exist_user () {
+  ret=$(getent passwd $1)
+  echo $?
+}
+
+# pass $groupname
+exist_group () {
+  ret=$(getent group $1)
+  echo $?
+}
+
+# pass $servicename
+exist_service () {
+  ret=$(systemctl is-active $1)
+  echo $?
+}
+
+# pass $group $user
+exist_user_in_group () {
+  ret=$(getent group $1 | grep -E -o $2)
+  echo $?
+}
+
+footer="
+      <hr />
+      <div align='center'>
+        Developed for Neotoma Composite Squadron, Civil Air Patrol<br />
+        by some guy who was really bored one night
+      </div>
+    </body>
+  </html>"
+
+write_header () {
+  file=$1
+  points=$2
+  header="
+  <!doctype html>
+     <html>
+      <head>
+        <title>Super Simple Score Report</title>
+        <meta http-equiv='refresh' content='60'>
+      </head>
+      <body style='font-family:monospace;font-size:12pt;background-color:lightgray;'>
+        <div align='center'><h2>Super Simple Score Report</h2></div>
+        <div align='center'><h3>Your score: ${2} out of ???</h3></div>
+        <div align='center'>$(date)</div>"
+  echo $header > $1
+}
+write_html () {
+  file="${location}/scoring_report.html"
+  write_header "${file}" "${total_points}"
+#  echo $header > $file
+  lines=("$@")
+  for line in "${lines[@]}"; do
+    echo $line
+    echo $line >> $file
+  done
+  echo $footer >> $file
+}
+#---- END helpers.sh
+#!/usr/bin/env bash
+
+uid=`id -g`
+if [ "$uid" != "0" ]; then
+  echo "run script with sudo"
+  echo "sudo ${0}"
+  exit
+fi
+
+
+
+
+# globals
+declare -a __list # global variable hack for csv2arr
+declare -a results
+total_points=0
+
+# hack to create a global variable with an array parsed from a csv list
+# global: __list
+# pass: csv string (no spaces between entries)
+#csv2arr () {
+#  line=$1
+#  readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
+#}
+
+record () {
+  txt=$1
+  points=$2
+  if [[ $points -lt 0 ]]; then
+    style='style="color:darkred"'
+  else
+    style='style="color:black"'
+  fi
+  results+=("<p ${style}>${txt} -- ${points} points</p>")
+  ((total_points += $points))
+}
+
+check_updates () {
+  upgrades=$(apt list --upgradable 2>/dev/null | wc -l)
+  [[ ${upgrades} -le 1 ]] && record "${policy[updates]}" ${policy[points]}
+}
+
+check_group_add () {
+  csv2arr "${groups_add[list]}"
+  for group in "${__list[@]}"; do
+    ret=$(exist_group $group)
+    if [[ $ret -eq 0 ]]; then
+      record "${groups_add[text]}: ${group}" ${groups_add[points]}
+    fi
+  done
+}
+
+# these are all greps into system files to ensure proper configuration
+check_pwage () {
+  file="/etc/login.defs"
+  age=$(grep ^PASS_MAX_DAYS $file |  cut -f2)
+  [[ $age =~ [[:digit:]] && $age -le 90 ]] && record "${policy[pwage]}" ${policy[points]}
+}
+
+check_pwminlen () {
+  file="/etc/pam.d/common-password"
+  val=$(grep -E -o minlen=[0-9]+ $file | cut -f2 -d=)
+  [[ $val -ge 8 ]] && record "${policy[pwminlen]}" ${policy[points]}
+}
+
+check_pwhistory () {
+  file="/etc/pam.d/common-password"
+  val=$(grep -E -o remember=[0-9]+ $file | cut -f2 -d=)
+  [[ $val -ge 5 ]] && record "${policy[pwhistory]}" ${policy[points]}
+}
+
+check_pwnullok () {
+  file="/etc/pam.d/common-auth"
+  val=$(grep -E -o nullok $file)
+  ret=$?
+  [[ $ret -eq 1 ]] && record "${policy[pwnullok]}" ${policy[points]}
+}
+
+check_pwquality () {
+  file="/etc/pam.d/common-password"
+  entries=("ucredit" "lcredit" "dcredit" "ocredit")
+  for entry in "${entries[@]}"
+  do
+    ret=$(grep -E -o ${entry}=[0-9-]+ $file | cut -f2 -d=)
+    [[ $ret -ne 0 ]] || return 1
+  done
+  record "${policy[pwquality]}" ${policy[points]}
+}
+
+check_ssh_root_login () {
+  file="/etc/ssh/sshd_config"
+  entry="PermitRootLogin"
+#  ret=$(grep -E -o ${entry}=[a-zA-Z]+ $file | cut -f2)
+  ret=$(grep ^${entry} $file 2> /dev/null)
+  [[ $? != 0 ]] && return 1
+  val=$(echo "$ret" | tr -s " " | cut -f2 -d" ")
+  [[ $val != "no" ]] && return 1
+  record "${policy[permitroot]}" ${policy[points]}
+}
+
+check_user_in_group () {
+  csv2arr "${addtogroup[list]}"
+  group="${addtogroup[name]}"
+  for user in "${__list[@]}"; do
+    ret=$(exist_user_in_group $group $user)
+    if [[ $ret -eq 0 ]]; then
+      record "User $user has been added to $group" ${policy[points]}
+    fi
+  done
+}
+
+check_auth_users () {
+  csv2arr "${users_auth[list]}"
+  for user in "${__list[@]}"; do
+    ret=$(exist_user $user)
+    if [[ $ret -ne 0 ]]; then
+      record "${users_auth[text]}: $user" ${users_auth[points]}
+    fi
+  done
+}
+
+check_auth_admins () {
+  csv2arr "${admins_auth[list]}"
+  for user in "${__list[@]}"; do
+    ret=$(exist_admin $user)
+    if [[ $ret -ne 0 ]]; then
+      record "${admins_auth[text]}: $user" ${admins_auth[points]}
+    fi
+  done
+}
+
+check_unauth_users () {
+  csv2arr "${users_unauth[list]}"
+  for user in "${__list[@]}"; do
+    ret=$(exist_user $user)
+    if [[ $ret -ne 0 ]]; then
+      record "${users_unauth[text]}: $user" ${users_unauth[points]}
+    fi
+  done
+}
+
+check_unauth_admins () {
+  csv2arr "${admins_unauth[list]}"
+  for user in "${__list[@]}"; do
+    ret=$(exist_admin $user)
+    if [[ $ret -ne 0 ]]; then
+      record "${admins_unauth[text]}: $user" ${admins_unauth[points]}
+    fi
+  done
+}
+
+check_critical_apps () {
+  csv2arr "${apps_auth[list]}"
+  for app in "${__list[@]}"; do
+    ret=$(is_installed $app)
+    insret=$?
+    if [[ $insret -ne 0 ]]; then
+      record "${apps_auth[text]}: $app" ${apps_auth[points]}
+    fi
+  done
+}
+
+check_apps_upgrade () {
+  csv2arr "${apps_upgrade[list]}"
+  for app in "${__list[@]}"; do
+    ret=$(is_upgradable $app)
+    upgret=$?
+    if [[ $upgret == 1 ]]; then
+      record "${apps_upgrade[text]}: $app" ${apps_upgrade[points]}
+    fi
+  done
+}
+
+check_contraband () {
+  loc="${contraband_files[location]}"
+  csv2arr "${contraband_files[files]}"
+  for file in "${__list[@]}"; do
+    if [[ ! -f ${loc}/${file} ]]; then
+      record "${contraband_files[text]}: $file" ${contraband_files[points]}
+    fi
+  done
+}
+
+check_ufw_enabled () {
+  val=$(ufw status | grep -E -o "Status: active")
+  [[ $val == "Status: active" ]] && record "${policy[fwactive]}" ${policy[points]}
+}
+
+check_apps_install () {
+  csv2arr "${apps_install[list]}"
+  for app in "${__list[@]}"; do
+    ret=$(is_installed $app)
+    insret=$?
+    if [[ $insret == 0 ]]; then
+      record "${apps_install[text]}: $app" ${apps_install[points]}
+    fi
+  done
+}
+
+# TODO
+# x check for nullok in password policy
+# test all values against [:digit:]
+# check for changed pasword
+#   create user password and compare hash to known bad
+#   getent shadow $user (sudo)
+# x firewall running
+# firewall rule for ssh
+# x check installed x2goserver,ruby
+# x check files in /home/garry/Music/
+# add forensics questions
+# x get original versions of all files we modify for setup
+# auth users?
+# auth admins?
+#
+# minus points
+check_auth_users
+check_auth_admins
+check_critical_apps
+# plus points
+check_updates
+check_apps_upgrade
+check_apps_install
+check_contraband # tktk music/video files
+check_unauth_users
+check_unauth_admins
+check_group_add
+check_user_in_group
+check_passwd_changed
+check_ufw_enabled
+check_ufw_rules # did you add sshd rule?
+check_pwage
+check_pwminlen
+check_pwhistory
+check_pwquality
+check_pwnullok
+check_ssh_root_login
+
+write_html "${results[@]}"
+#for line in "${results[@]}"; do
+#  echo $line
+#done
+#echo ${results[@]}
+
+echo "total points: ${total_points}"
