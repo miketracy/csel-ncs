@@ -1,0 +1,7 @@
+Enter the answer to this forensic question below 
+
+------------------------------------------------ 
+
+What is the SHA-256 checksum for the contraband mp3 file you found?
+
+ANSWER: <type your answer here>

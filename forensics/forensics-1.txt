@@ -1,0 +1,9 @@
+Enter the answer to this forensic question below
+
+------------------------------------------------
+
+Enter the full path to the directory where contraband user files exist.
+
+Don't forget the trailing slash (e.g: /var/log/)
+
+ANSWER: <type your answer here>

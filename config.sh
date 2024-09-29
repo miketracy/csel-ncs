@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-location="/home/campy/Desktop/"
+cpuser="campy"
+location="/home/${cpuser}/Desktop/"
 total_points=0
 declare -a results
 
@@ -12,16 +13,17 @@ declare -a results
 
 # ablist where a = ugasz (user,group,application,service,administrator)
 #              b = acn (authorized,create,not authorized)
-ualist="campy,barry,carry,garry,harry,jerry,kerri,larry,mary,perry,terry" #,jennifer"
+# don't ever mess with campy
+ualist="barry,carry,garry,harry,jerry,kerri,larry,mary,perry,terry" #,jennifer"
 uclist="jennifer"
 unlist="inky,pinky,blinky,clyde"
 gclist="warriors,noobs"
-aalist="firefox,thunderbird,ufw"
-aclist="ruby,x2goserver,openssh-server"
+aalist="firefox,thunderbird,ufw,openssh-server"
+aclist="ruby,x2goserver,openssh-server,ufw"
 anlist="nginx,nginx-common,nginx-core,wireshark,vsftpd,aisleriot,qbittorrent,ophcrack"
 salist="sshd"
 snlist="nginx,vsftpd"
-zalist="campy,barry,larry"
+zalist="barry,larry"
 znlist="garry"
 contraband_location="/home/garry/Music/"
 
@@ -120,4 +122,17 @@ policy=(
   [permitroot]="Root logins via ssh have been disabled"
   [pwnullok]="Null password logins are disabled"
   [fwactive]="UFW firewall is enabled and running"
+)
+
+declare -A forensics_questions
+forensics_questions=(
+  [questions]="forensics-1.txt,forensics-2.txt"
+)
+
+declare -A forensics_answers
+forensics_answers=(
+  [points]=11
+  [text]="Forensics question correct"
+  ['forensics-1.txt']="/home/garry/Music/"
+  ['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
 )

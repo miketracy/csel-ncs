@@ -182,7 +182,7 @@ check_contraband () {
 }
 
 check_ufw_enabled () {
-  val=$(ufw status | grep -E -o "Status: active")
+  val=$(ufw status 2&>1 | grep -E -o "Status: active")
   [[ $val == "Status: active" ]] && record "${policy[fwactive]}" ${policy[points]}
 }
 
@@ -197,37 +197,79 @@ check_apps_install () {
   done
 }
 
+check_apps_unauth () {
+  csv2arr "${apps_unauth[list]}"
+  for app in "${__list[@]}"; do
+    ret=$(is_installed $app)
+    insret=$?
+    if [[ $insret == 1 ]]; then
+      record "${apps_unauth[text]}: $app" ${apps_unauth[points]}
+    fi
+  done
+}
+
+# special case for ssh only. we could expand this later
+check_fw_rules () {
+#omg this is dumb holy crap
+  val=$(ufw status numbered 2&>1 | sed 's/\ \ \ */:/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -E -o "22/tcp:ALLOW IN:Anywhere")
+  ret=$?
+  [[ $ret != 0 ]] && record "Firewall rule to allow sshd is not active" -25
+}
+
+check_forensics () {
+  for file in "${!forensics_answers[@]}"; do
+    if [[ -f "${location}/${file}" ]]; then
+      ans=$(grep -E -o ANSWER.* ${location}/${file} | sed 's/ANSWER:\ //g')
+      if [[ $ans == "${forensics_answers["$file"]}" ]]; then
+        record "${forensics_answers[text]}: ${file}" ${forensics_answers[points]}
+      fi
+    fi
+  done
+}
+
 # TODO
 # x check for nullok in password policy
-# test all values against [:digit:]
-# check for changed pasword
-#   create user password and compare hash to known bad
-#   getent shadow $user (sudo)
 # x firewall running
 # firewall rule for ssh
 # x check installed x2goserver,ruby
 # x check files in /home/garry/Music/
-# add forensics questions
 # x get original versions of all files we modify for setup
-# auth users?
-# auth admins?
+# x auth users?
+# x auth admins?
+# x check firewall rule for 22/tcp
+# test all values against [:digit:]
+# check for changed pasword
+#   create user password and compare hash to known bad
+#   getent shadow $user (sudo)
+# x add forensics questions
+# check for plaintext passwords in /etc/shadow
+# check perms on /home/
+# check for setuid files
+# make sure all passwords are in /etc/shadow (pwent user:x:...)
+# make sure all users in /etc/shadow are in /etc/password
+# check config of /etc/sysctl.conf
+#
+# add lightdm configs
 #
 # minus points
 check_auth_users
 check_auth_admins
 check_critical_apps
 # plus points
+check_forensics
 check_updates
 check_apps_upgrade
 check_apps_install
-check_contraband # tktk music/video files
+check_apps_unauth
+check_contraband # music/video files in /home/
 check_unauth_users
 check_unauth_admins
 check_group_add
 check_user_in_group
-check_passwd_changed
+check_passwd_changed # tktk make sure designated users aren't "!" in shadow
+check_root_passwd # tktk make sure root is usermod "!" and passwd -l
 check_ufw_enabled
-check_ufw_rules # did you add sshd rule?
+check_fw_rules # did you add sshd rule?
 check_pwage
 check_pwminlen
 check_pwhistory

@@ -7,6 +7,8 @@ if [ "$uid" != "0" ]; then
   exit
 fi
 
+declare -a __list
+
 source ./helpers.sh
 source ./config.sh
 
@@ -15,6 +17,14 @@ pandoc -f markdown -t html simple_README.md -o simple_README.html --css=pandoc.c
 
 echo "copy readme to ${location}"
 cp -f simple_README.html ${location}
+chmod 0644 ${location}/simple_README.html
+
+echo "install forensics questions"
+csv2arr "${forensics_questions[questions]}"
+for file in "${__list[@]}"; do
+  cp -f ./forensics/$file $location
+  chown ${cpuser}:${cpuser} ${location}/${file}
+done
 
 echo "create executable"
 cat helpers.sh config.sh scoring.sh | sed 's/^source.*//g' > simple_score

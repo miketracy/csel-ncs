@@ -18,15 +18,27 @@ source ./helpers.sh
 
 declare -a __list
 
+# special case rm ufw
+apt purge ufw -y
+eapt autoremove -y
+
 # add users
 csv2arr "${ualist}"
 for user in "${__list[@]}"; do
+  userdel $user
   useradd $user
+  mkdir -p /home/${user}
+  chown -R $user:$user /home/${user}
+  chmod 0750 /home/${user}
 done
 
 csv2arr "${unlist}"
 for user in "${__list[@]}"; do
+  userdel $user
   useradd $user
+  mkdir -p /home/${user}
+  chown -R $user:$user /home/${user}
+  chmod 0750 /home/${user}
 done
 
 # add groups
@@ -63,6 +75,7 @@ done
 # install orig files
 cp -f orig/common-* /etc/pam.d/
 cp -f orig/login.defs /etc/
+cp -f orig/sysctl.conf /etc/
 
 # make some music
 EICAR='X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
