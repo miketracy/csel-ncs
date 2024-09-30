@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # debug echo
 debug () {
-  echo "$@" >&2
+  if [[ $debug -eq 0 ]]; then
+    echo "$@" >&2
+  fi
 }
 
 # hack to create a global variable with an array parsed from a csv list
@@ -9,13 +11,14 @@ debug () {
 # pass: csv string (no spaces between entries)
 csv2arr () {
   line=$1
-#  debug $line
-#  declare -a ret
+  debug "${FUNCNAME} line = ${line}"
   readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
-#  readarray -d ',' -t ret < <(printf $line) # use printf to prevent trailing \n
-#  echo "${ret[@]}"
 }
 
+add_possible_points () {
+  points=$1
+  [[ points -ge 0 ]] && ((possible_points += points))
+}
 # configure users in setup
 configure_users () {
   apt install whois # make sure we have mkpasswd
@@ -30,7 +33,7 @@ configure_users () {
     is_admin=${__list[4]}
     sonly=${__list[5]}
     group=${__list[6]}
-    debug "${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
+    debug "${FUNCNAME} ${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
     userdel -r $user
     rm -rf /home/$user
     if [[ $creat == 0 ]]; then
@@ -43,7 +46,7 @@ configure_users () {
       [[ $is_admin -eq 1 ]] && gpasswd -a $user sudo
       [[ $sonly -eq 1 ]] && sed '/^${user}.*/d' /etc/passwd
     else
-      debug "SKIPPING ${user}"
+      debug "${FUNCNAME} SKIPPING ${user}"
     fi
   done
 }
@@ -126,7 +129,7 @@ write_header () {
       </head>
       <body style='font-family:monospace;font-size:12pt;background-color:lightgray;'>
         <div align='center'><h2>Super Simple Score Report</h2></div>
-        <div align='center'><h3>Your score: ${2} out of ???</h3></div>
+        <div align='center'><h3>Your score: ${2} out of ${possible_points}</h3></div>
         <div align='center'>$(date)</div><hr /><br />"
   echo $header > $1
 }

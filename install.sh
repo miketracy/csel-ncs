@@ -28,7 +28,15 @@ for file in "${__list[@]}"; do
 done
 
 echo "create executable"
-cat scoring.sh helpers.sh config.sh main.sh | sed 's/^source.*//g' > simple_score
+cat \
+  scoring.sh \
+  scoring_policy.sh \
+  helpers.sh \
+  config.sh \
+  config_policy.sh \
+  config_stig.sh \
+  main.sh \
+| sed 's/^source.*//g' > simple_score
 
 echo "install in /usr/local/bin"
 cp -f simple_score /usr/local/bin
