@@ -20,7 +20,7 @@ declare -a __list
 
 # special case rm ufw
 apt purge ufw -y
-eapt autoremove -y
+apt autoremove -y
 
 # add users
 csv2arr "${ualist}"
@@ -43,6 +43,13 @@ done
 
 # add groups
 
+# delete groups
+# add packages
+csv2arr "${gclist}"
+for group in "${__list[@]}"; do
+  delgroup $group
+done
+
 # add packages
 csv2arr "${anlist}"
 for pkg in "${__list[@]}"; do
@@ -59,8 +66,6 @@ done
 # special case downgrade thunderbird
 apt --allow-downgrades install thunderbird=1:91.8.0+build2-0ubuntu1 -y
 
-# rm packages
-
 # add administrators
 csv2arr "${zalist}"
 for user in "${__list[@]}"; do
@@ -71,6 +76,9 @@ csv2arr "${znlist}"
 for user in "${__list[@]}"; do
   gpasswd -a $user sudo
 done
+
+# set up users
+configure_users
 
 # install orig files
 cp -f orig/common-* /etc/pam.d/

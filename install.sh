@@ -24,10 +24,11 @@ csv2arr "${forensics_questions[questions]}"
 for file in "${__list[@]}"; do
   cp -f ./forensics/$file $location
   chown ${cpuser}:${cpuser} ${location}/${file}
+  chmod 0644 ${location}/${file}
 done
 
 echo "create executable"
-cat helpers.sh config.sh scoring.sh | sed 's/^source.*//g' > simple_score
+cat scoring.sh helpers.sh config.sh main.sh | sed 's/^source.*//g' > simple_score
 
 echo "install in /usr/local/bin"
 cp -f simple_score /usr/local/bin

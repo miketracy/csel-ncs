@@ -1,0 +1,35 @@
+TODO
+! forensics questions not working
+x firewall running
+x firewall rule for ssh
+x check installed x2goserver,ruby
+x check for nullok in password policy
+x check files in /home/garry/Music/
+x get original versions of all files we modify for setup
+x auth users?
+x auth admins?
+x check firewall rule for 22/tcp
+x add forensics questions
+  test all values against [:digit:]
+  check for changed pasword
+  create user password and compare hash to known bad
+  getent shadow $user (sudo)
+  check for plaintext passwords in /etc/shadow
+  check perms on /home/
+  check for setuid files
+  make sure all passwords are in /etc/shadow (pwent user:x:...)
+  make sure all users in /etc/shadow are in /etc/password
+  check for auditd
+  check config of /etc/sysctl.conf
+  no plaintext passwords
+  make sure there are no md5 passwords
+  use chage to expire passwords
+  securely configure scrypt (yescrypt) in pam
+  check secure perms in /home
+  
+! finish configure_users and convert to it
+
+add lightdm configs
+figure out what is writing file "1". some bad ufw command running in simple-score
+
+minus points

@@ -63,7 +63,9 @@ Make sure it's installed.
 
 You really can't stand solitaire games. Make sure they all find /dev/null.
 
-Since people might be using your rig over ssh, you want them to have a desktop environment to use. X2Go fits that bill exactly. Make sure it's available.
+Since people might be using your rig over ssh. You use openssh-server to provide 
+ssh an sshd server on your rig. You want them to have a desktop environment to 
+use over ssh. X2Go fits that bill exactly. Make sure it's available.
 
 Critical service:
 sshd
@@ -72,12 +74,11 @@ sshd
 
 Authorized Administrators:
 
-campy (you)
-    password: Pat42#ncs
-barry
-    password: Z!pit3do0D4h
-larry
-    password: fnork
+| username | password |
+| -------- | -------- |
+campy (you) | Pat42#ncs
+barry | Z!pit3do0D4h
+larry | fnork
 
 Authorized Users:
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# debug echo
 debug () {
   echo "$@" >&2
 }
@@ -14,6 +14,38 @@ csv2arr () {
   readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
 #  readarray -d ',' -t ret < <(printf $line) # use printf to prevent trailing \n
 #  echo "${ret[@]}"
+}
+
+# configure users in setup
+configure_users () {
+  apt install whois # make sure we have mkpasswd
+  for user in "${!users_config[@]}"; do
+    # dumbest way to handle a struct ever
+    # and I hate bash for true=0 and false=1
+    csv2arr "${users_config[$user]}"
+    creat=${__list[0]}
+    ptype=${__list[1]}
+    pword=${__list[2]}
+    is_auth=${__list[3]}
+    is_admin=${__list[4]}
+    sonly=${__list[5]}
+    group=${__list[6]}
+    debug "${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
+    userdel -r $user
+    rm -rf /home/$user
+    if [[ $creat == 0 ]]; then
+      useradd -m $user
+      if [[ $ptype == "plain" ]]; then
+        usermod -p $pword $user
+      else
+        usermod -p $(mkpasswd -m $ptype $pword) $user
+      fi
+      [[ $is_admin -eq 1 ]] && gpasswd -a $user sudo
+      [[ $sonly -eq 1 ]] && sed '/^${user}.*/d' /etc/passwd
+    else
+      debug "SKIPPING ${user}"
+    fi
+  done
 }
 
 # pass $packagename
@@ -95,7 +127,7 @@ write_header () {
       <body style='font-family:monospace;font-size:12pt;background-color:lightgray;'>
         <div align='center'><h2>Super Simple Score Report</h2></div>
         <div align='center'><h3>Your score: ${2} out of ???</h3></div>
-        <div align='center'>$(date)</div>"
+        <div align='center'>$(date)</div><hr /><br />"
   echo $header > $1
 }
 write_html () {
@@ -108,5 +140,6 @@ write_html () {
     echo $line >> $file
   done
   echo $footer >> $file
+  cp $file /mnt/z/
 }
 #---- END helpers.sh

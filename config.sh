@@ -1,15 +1,7 @@
-#!/usr/bin/env bash
+
 
 cpuser="campy"
 location="/home/${cpuser}/Desktop/"
-total_points=0
-declare -a results
-
-#declare -A admins_auth
-#declare -A admins_unauth
-#declare -A apps_required
-#declare -A apps_remove
-# lightdm settings
 
 # ablist where a = ugasz (user,group,application,service,administrator)
 #              b = acn (authorized,create,not authorized)
@@ -25,7 +17,32 @@ salist="sshd"
 snlist="nginx,vsftpd"
 zalist="barry,larry"
 znlist="garry"
+ppasswd="kerri,sohappy" # user with plaintext password
+ushadow=""
+spasswd="Pat42#ncs"
+
 contraband_location="/home/garry/Music/"
+
+# in setup, this will set each user's password to the indicated type and value
+# [username]="create,type,password,is_auth,is_admin,shadow_only,group membership
+declare -A users_config=(
+  [barry]="0,yescrypt,${spasswd},1,1,0,warriors"
+  [carry]="0,yescrypt,${spasswd},1,1,0,"
+  [garry]="0,yescrypt,${spasswd},1,1,0,"
+  [harry]="0,plain,iamapassword,1,0,0,"
+  [jerry]="0,sha-512,${spasswd},1,0,0,"
+  [kerri]="0,sha-512,${spasswd},1,0,0,"
+  [larry]="0,yescrypt,${spasswd},1,1,0,"
+  [mary]="0,md5,${spasswd},1,0,0,"
+  [perry]="0,sha-256,${spasswd},1,0,0,"
+  [terry]="0,plain,derpydoo,1,0,0,"
+  [inky]="0,yescrypt,${spasswd},0,0,0,"
+  [pinky]="0,yescrypt,${spasswd},0,0,0,"
+  [blinky]="0,yescrypt,${spasswd},0,0,0,"
+  [clyde]="0,yescrypt,${spasswd},0,0,0,"
+  [haxor]="0,plain,pwnt,0,0,1,"
+  [jennifer]="1,yescrypt,${spasswd},0,0,0,warriors"
+)
 
 # special case. these users belong in this group.
 declare -A addtogroup
@@ -43,13 +60,13 @@ declare -A contraband_files=(
 )
 
 declare -A apps_upgrade=(
-  [points]=4
+  [points]=3
   [text]="Package has been updated"
   [list]="${aalist}"
 )
 
 declare -A apps_install=(
-  [points]=4
+  [points]=3
   [text]="Required package has been installed"
   [list]="${aclist}"
 )
@@ -61,7 +78,7 @@ declare -A svcs_unauth=(
 )
 
 declare -A apps_unauth=(
-  [points]=6
+  [points]=3
   [text]="Unauthorized application has been removed"
   [list]="${anlist}"
 )
@@ -99,7 +116,7 @@ users_auth=(
 
 declare -A users_unauth
 users_unauth=(
-  [points]=6
+  [points]=3
   [text]="Unauthorized user has been removed"
   [list]="${unlist}"
 )
@@ -131,8 +148,8 @@ forensics_questions=(
 
 declare -A forensics_answers
 forensics_answers=(
-  [points]=11
-  [text]="Forensics question correct"
-  ['forensics-1.txt']="/home/garry/Music/"
-  ['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
+[points]=11
+[text]="Forensics question correct"
+['forensics-1.txt']="/home/garry/Music/"
+['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
 )
