@@ -16,12 +16,12 @@ Log in as the user you created (ensure you have sudoers access).
 
 Run scripts using sudo to make sure you never clobber your logged in user.
 
-#. $ sudo apt install git
-#. $ git clone https://github.com/miketracy/csel-ncs
-#. $ cd csel-ncs/
-#. $ sudo git install pandoc
-#. $ sudo ./setup.sh # this will setup the scenario that's been configured
-#. $ sudo ./install.sh
+1. $ sudo apt install git
+2. $ git clone https://github.com/miketracy/csel-ncs
+3. $ cd csel-ncs/
+4. $ sudo git install pandoc
+5. $ sudo ./setup.sh # this will setup the scenario that's been configured
+6. $ sudo ./install.sh
 
 You should have 2 forensics questions, a README and a scoring report on your 
 desktop. Run through the README tasks and you're on your own for more points.
