@@ -1,157 +1,150 @@
-# globals
-declare -a __list # global variable hack for csv2arr
-declare -a results
-total_points=0
-possible_points=0
-debug=0
 
-#tktk refactor
 check_user_in_group () {
-  declare -n struct=users_in_group
-  csv2arr "${struct[list]}"
-  group="${struct[name]}"
-  for user in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=users_in_group
+  declare -n list="${hash[list]}"
+  group="${hash[name]}"
+  for user in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(exist_user_in_group $group $user)
     if [[ $ret -eq 0 ]]; then
-      record "User $user has been added to $group" ${struct[points]}
+      record "User $user has been added to $group" ${hash[points]}
     fi
   done
 }
 
 check_group_add () {
-  declare -n struct=groups_add
-  csv2arr "${struct[list]}"
-  for group in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=groups_create
+  declare -n list="${hash[list]}"
+  for group in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     debug "($FUNCNAME) group = $group"
     ret=$(exist_group $group)
     if [[ $ret -eq 0 ]]; then
-      record "${struct[text]}: ${group}" ${struct[points]}
+      record "${hash[text]}: ${group}" ${hash[points]}
     fi
   done
 }
 
 check_auth_users () {
-  declare -n struct=users_auth
-  csv2arr "${struct[list]}"
-  for user in "${__list[@]}"; do
-#    add_possible_points ${struct[points]}
+  declare -n hash=users_auth
+  declare -n list="${hash[list]}"
+  for user in "${list[@]}"; do
+#    add_possible_points ${hash[points]}
     ret=$(exist_user $user)
     if [[ $ret -ne 0 ]]; then
-      record "${struct[text]}: $user" ${struct[points]}
+      record "${hash[text]}: $user" ${hash[points]}
     fi
   done
 }
 
 check_auth_admins () {
-  declare -n struct=admins_auth
-  csv2arr "${struct[list]}"
-  for user in "${__list[@]}"; do
-#    add_possible_points ${struct[points]}
+  declare -n hash=admins_auth
+  declare -n list="${hash[list]}"
+  for user in "${list[@]}"; do
+#    add_possible_points ${hash[points]}
     ret=$(exist_admin $user)
     if [[ $ret -ne 0 ]]; then
-      record "${struct[text]}: $user" ${struct[points]}
+      record "${hash[text]}: $user" ${hash[points]}
     fi
   done
 }
 
 check_unauth_users () {
-  declare -n struct=users_unauth
-  csv2arr "${struct[list]}"
-  for user in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=users_unauth
+  declare -n list="${hash[list]}"
+  for user in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(exist_user $user)
     if [[ $ret -ne 0 ]]; then
-      record "${struct[text]}: $user" ${struct[points]}
+      record "${hash[text]}: $user" ${hash[points]}
     fi
   done
 }
 
 check_unauth_admins () {
-  declare -n struct=admins_unauth
-  csv2arr "${struct[list]}"
-  for user in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=admins_unauth
+  declare -n list="${hash[list]}"
+  for user in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(exist_admin $user)
     if [[ $ret -ne 0 ]]; then
-      record "${struct[text]}: $user" ${struct[points]}
+      record "${hash[text]}: $user" ${hash[points]}
     fi
   done
 }
 
-check_critical_apps () {
-  declare -n struct=apps_auth
-  csv2arr "${struct[list]}"
-  for app in "${__list[@]}"; do
-#    add_possible_points ${struct[points]}
+check_apps_critical () {
+  declare -n hash=apps_critical
+  declare -n list="${hash[list]}"
+  for app in "${list[@]}"; do
+#    add_possible_points ${hash[points]}
     ret=$(is_installed $app)
     insret=$?
     if [[ $insret -ne 0 ]]; then
-      record "${struct[text]}: $app" ${struct[points]}
+      record "${hash[text]}: $app" ${hash[points]}
     fi
   done
 }
 
 check_apps_upgrade () {
-  declare -n struct=apps_upgrade
-  csv2arr "${struct[list]}"
-  for app in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=apps_upgrade
+  declare -n list="${hash[list]}"
+  for app in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(is_upgradable $app)
     upgret=$?
     if [[ $upgret == 1 ]]; then
-      record "${struct[text]}: $app" ${struct[points]}
+      record "${hash[text]}: $app" ${hash[points]}
     fi
   done
 }
 
 check_contraband () {
-  declare -n struct=contraband_files
-  loc="${struct[location]}"
-  csv2arr "${struct[files]}"
-  for file in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=contraband_files
+  loc="${hash[location]}"
+  declare -n list="${hash[files]}"
+  for file in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     if [[ ! -f ${loc}/${file} ]]; then
-      record "${struct[text]}: $file" ${struct[points]}
+      record "${hash[text]}: $file" ${hash[points]}
     fi
   done
 }
 
 check_apps_install () {
-  declare -n struct=apps_install
-  csv2arr "${struct[list]}"
-  for app in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=apps_install
+  declare -n list="${hash[list]}"
+  for app in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(is_installed $app)
     insret=$?
     if [[ $insret == 0 ]]; then
-      record "${struct[text]}: $app" ${struct[points]}
+      record "${hash[text]}: $app" ${hash[points]}
     fi
   done
 }
 
 check_apps_unauth () {
-  declare -n struct=apps_unauth
-  csv2arr "${struct[list]}"
-  for app in "${__list[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=apps_unauth
+  declare -n list="${hash[list]}"
+  for app in "${list[@]}"; do
+    add_possible_points ${hash[points]}
     ret=$(is_installed $app)
     insret=$?
     if [[ $insret == 1 ]]; then
-      record "${struct[text]}: $app" ${struct[points]}
+      record "${hash[text]}: $app" ${hash[points]}
     fi
   done
 }
 
 check_forensics () {
-  declare -n struct=forensics_answers
-  for file in "${!struct[@]}"; do
-    add_possible_points ${struct[points]}
+  declare -n hash=forensics_answers
+  for file in "${!hash[@]}"; do
+    add_possible_points ${hash[points]}
     if [[ -f "${location}/${file}" ]]; then
       ans=$(grep -E -o ANSWER.* ${location}/${file} | sed 's/ANSWER:\ //g')
-      if [[ $ans == "${struct["$file"]}" ]]; then
-        record "${struct[text]}: ${file}" ${struct[points]}
+      if [[ $ans == "${hash["$file"]}" ]]; then
+        record "${hash[text]}: ${file}" ${hash[points]}
       fi
     fi
   done

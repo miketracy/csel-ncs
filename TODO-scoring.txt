@@ -10,6 +10,8 @@ x auth users?
 x auth admins?
 x check firewall rule for 22/tcp
 x add forensics questions
+
+  put an id -un brake on creating users
   test all values against [:digit:]
   check for changed pasword
   create user password and compare hash to known bad
@@ -27,8 +29,8 @@ x add forensics questions
   securely configure scrypt (yescrypt) in pam
   check secure perms in /home
   
+! refactor from csv2arr (it sucks). Look at config_stig.sh for an example.
 ! finish configure_users and convert to it
-
 add lightdm configs
 figure out what is writing file "1". some bad ufw command running in simple-score
 

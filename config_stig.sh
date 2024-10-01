@@ -1,5 +1,5 @@
 
-declare -a stig_svcs_disabled=(
+declare -a stig_services_disabled=(
   "apache2" "autofs" "avahi-daemon" "bind9" "bluez" "cups" "dnsmasq"
   "dovecot-imapd" "ftp" "isc-dhcp-server" "ldap-utils"
   "nginx" "nfs-kernel-server" "nis" "rpcbind" "rsh-client" "rsync"
@@ -37,4 +37,32 @@ declare -a stig_sysctl_config=(
   "net.ipv6.conf.all.disable_ipv6=1"
   "net.ipv6.conf.default.disable_ipv6=1"
   "net.ipv6.conf.lo.disable_ipv6=1"
+)
+
+declare -a stig_sshd_config
+stig_sshd_config+=("PermitRootLogin no")
+stig_sshd_config+=("Protocol 2")
+stig_sshd_config+=("DisableForwarding yes")
+stig_sshd_config+=("GSSAPIAuthentication no")
+stig_sshd_config+=("HostbasedAuthentication no")
+stig_sshd_config+=("IgnoreRhosts yes")
+stig_sshd_config+=("PermitEmptyPasswords no")
+stig_sshd_config+=("PermitUserEnvironment no")
+stig_sshd_config+=("UsePAM yes")
+
+declare -a stig_lightdm_config=(
+  "allow-guest=false"
+  "greeter-hide-users=true"
+  "greeter-show-manual-login=true"
+)
+
+# store the name of the array to use as a reference
+# declare -n list="${stig_checks[$key]}"
+# this is a working hack and I do not know why
+declare -A stig_checks=(
+  [points]=7
+  [services]=stig_services_disabled
+  [sysctl]=stig_sysctl_config
+  [sshd]=stig_sshd_config
+  [lightdm]=stig_lightdm_config
 )

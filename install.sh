@@ -20,8 +20,8 @@ cp -f simple_README.html ${location}
 chmod 0644 ${location}/simple_README.html
 
 echo "install forensics questions"
-csv2arr "${forensics_questions[questions]}"
-for file in "${__list[@]}"; do
+declare -n list="${forensics_questions[questions]}"
+for file in "${list[@]}"; do
   cp -f ./forensics/$file $location
   chown ${cpuser}:${cpuser} ${location}/${file}
   chmod 0644 ${location}/${file}

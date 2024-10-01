@@ -8,13 +8,14 @@ if [ "$uid" != "0" ]; then
 fi
 
 # globals
-#declare -a __list # global variable hack for csv2arr
-#declare -a results
-#total_points=0
-
+declare -a results
+total_points=0
+possible_points=0
+debug=0
 
 source ./scoring.sh
 source ./scoring_policy.sh
+source ./scoring_stig.sh
 source ./config.sh
 source ./config_policy.sh
 source ./config_stig.sh
@@ -38,7 +39,7 @@ if [[ ${modules[negative]} -eq 0 ]]; then
   modules_main+=(
     "check_auth_users"
     "check_auth_admins"
-    "check_critical_apps"
+    "check_apps_critical"
     "check_fw_rules" # did you add sshd rule?
   )
 fi

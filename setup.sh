@@ -18,47 +18,27 @@ source ./helpers.sh
 
 declare -a __list
 
-# special case rm ufw
-apt purge ufw -y
-apt autoremove -y
-
-# add users
-csv2arr "${ualist}"
-for user in "${__list[@]}"; do
-  userdel $user
-  useradd $user
-  mkdir -p /home/${user}
-  chown -R $user:$user /home/${user}
-  chmod 0750 /home/${user}
-done
-
-csv2arr "${unlist}"
-for user in "${__list[@]}"; do
-  userdel $user
-  useradd $user
-  mkdir -p /home/${user}
-  chown -R $user:$user /home/${user}
-  chmod 0750 /home/${user}
-done
-
 # add groups
-
-# delete groups
-# add packages
-csv2arr "${gclist}"
-for group in "${__list[@]}"; do
+declare -n list=groups_create_list
+for group in "${list[@]}"; do
   delgroup $group
 done
 
 # add packages
-csv2arr "${anlist}"
-for pkg in "${__list[@]}"; do
+declare -n list=apps_unauth_list
+for pkg in "${list[@]}"; do
   apt install $pkg -y
 done
 
 # remove packages
-csv2arr "${aclist}"
-for pkg in "${__list[@]}"; do
+declare -n list=apps_critical_list
+for pkg in "${list[@]}"; do
+  apt purge $pkg -y
+  apt autoremove -y
+done
+
+declare -n list=apps_install_list
+for pkg in "${list[@]}"; do
   apt purge $pkg -y
   apt autoremove -y
 done
@@ -87,7 +67,10 @@ cp -f orig/sysctl.conf /etc/
 
 # make some music
 EICAR='X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
-mkdir -p /home/garry/Music/
-echo $EICAR > /home/garry/Music/some-song.mp3
-echo $EICAR > /home/garry/Music/some-movie.mp4
-echo $EICAR > /home/garry/Music/bad-image.png
+declare -n hash=contraband_files
+location="${hash[location]}"
+declare -n list="${hash[files]}"
+mkdir -p $location
+for file in "${list[@]}"; do
+  echo $EICAR > ${location}/${file}
+done

@@ -10,28 +10,64 @@ declare -A modules=(
 
 #### setup varibles
 #
-cpuser="campy" #your currently logged in user
+cpuser=${SUDO_USER} #your currently logged in user
 location="/home/${cpuser}/Desktop/"
 
-# ablist where a = ugasz (user,group,application,service,administrator)
-#              b = acn (authorized,create,not authorized)
-# don't ever mess with campy
-ualist="barry,carry,garry,harry,jerry,kerri,larry,mary,perry,terry" #,jennifer"
-uclist="jennifer"
-unlist="inky,pinky,blinky,clyde"
-gclist="warriors,noobs"
-aalist="firefox,thunderbird,ufw,openssh-server"
-aclist="ruby,x2goserver,openssh-server,ufw"
-anlist="nginx,nginx-common,nginx-core,wireshark,vsftpd,aisleriot,qbittorrent,ophcrack"
-salist="sshd"
-snlist="nginx,vsftpd"
-zalist="barry,larry"
-znlist="garry"
-ppasswd="kerri,sohappy" # user with plaintext password
-ushadow=""
-spasswd="Pat42#ncs"
+#### lists for checks
+#
+declare -a users_auth_list=(
+  "barry" "carry" "garry" "harry" "jerry"
+  "kerri" "larry" "mary" "perry" "terry"
+)
 
-contraband_location="/home/garry/Music/"
+declare -a users_create_list=(
+  "jennifer"
+)
+declare -a users_unauth_list=(
+  "inky" "pinky" "blinky" "clyde"
+)
+
+declare -a admins_auth_list=(
+  "barry" "larry"
+)
+
+declare -a admins_unauth_list=(
+  "garry"
+)
+
+declare -a groups_create_list=(
+  "warriors" "noobs"
+)
+
+declare -a apps_upgrade_list=(
+  "firefox" "thunderbird" "ufw" "openssh-server"
+)
+
+declare -a apps_install_list=(
+  "ruby" "x2goserver"
+)
+
+declare -a apps_critical_list=(
+  "openssh-server" "ufw"
+)
+
+declare -a apps_unauth_list=(
+  "nginx" "nginx-common" "nginx-core" "wireshark"
+  "vsftpd" "aisleriot" "qbittorrent" "ophcrack"
+)
+
+declare -a svcs_critical_list=(
+  "sshd"
+)
+
+declare -a svcs_unauth_list=(
+  "nginx" "vsftpd"
+)
+
+#ppasswd="kerri" "sohappy" # user with plaintext password
+#ushadow="haxor"
+
+spasswd="Pat42#ncs"
 
 #### set up all users and their group memberships
 #    in setup, this will set each user's password to the indicated type and value
@@ -59,91 +95,95 @@ declare -A users_config=(
 
 # special case. these users belong in this group.
 # tktk refactor
-declare -A users_in_group
-users_in_group=(
+declare -a users_in_group_list=(
+  "jennifer"
+  "barry"
+)
+declare -A users_in_group=(
   [points]=3
   [name]="warriors"
-  [list]="jennifer,barry,removeme"
+  [list]=users_in_group_list
+)
+
+declare -a contraband_files_list=(
+  "bad-image.png"
+  "some-movie.mp4"
+  "some-song.mp3"
+)
+declare -A contraband_files=(
+  [points]=3
+  [text]="Contraband file has been removed"
+  [location]="/home/garry/Music/"
+  [files]=contraband_files_list
 )
 
 declare -A admins_auth=(
   [points]=-10
   [text]="Authorized administrator has been removed"
-  [list]="${zalist}"
+  [list]=admins_auth_list
 )
 
 declare -A admins_unauth=(
   [points]=3
   [text]="Unauthorized administrator has been removed"
-  [list]="${znlist}"
+  [list]=admins_unauth_list
 )
 
-declare -A users_auth
-users_auth=(
+declare -A users_auth=(
   [points]=-10
   [text]="Authorized user has been removed"
-  [list]="${ualist}"
+  [list]=users_auth_list
 )
 
-declare -A users_unauth
-users_unauth=(
+declare -A users_unauth=(
   [points]=3
   [text]="Unauthorized user has been removed"
-  [list]="${unlist}"
+  [list]=users_unauth_list
 )
 
-declare -A groups_add
-groups_add=(
+declare -A groups_create=(
   [points]=3
   [text]="Required group has been created"
-  [list]="${gclist}"
+  [list]=groups_create_list
 )
 
 #### files, apps and services
 
-# tktk refactor
-declare -A contraband_files=(
-  [points]=3
-  [text]="Contraband file has been removed"
-  [location]="${contraband_location}"
-  [files]="bad-image.png,some-movie.mp4,some-song.mp3"
-)
-
 declare -A apps_upgrade=(
   [points]=3
   [text]="Package has been updated"
-  [list]="${aalist}"
+  [list]=apps_upgrade_list
 )
 
 declare -A apps_install=(
   [points]=3
   [text]="Required package has been installed"
-  [list]="${aclist}"
+  [list]=apps_install_list
+)
+
+declare -A apps_unauth=(
+  [points]=3
+  [text]="Unauthorized application has been removed"
+  [list]=apps_unauth_list
+)
+
+declare -A apps_critical=(
+  [points]=-10
+  [text]="Critical application has been removed"
+  [list]=apps_critical_list
 )
 
 #tktk
 declare -A svcs_auth=(
   [points]=-10
   [text]="Critical service is not running"
-  [list]="${salist}"
+  [list]=services_critical_list
 )
 
 declare -A svcs_unauth=(
   [points]=6
   [text]="Unauthorized servive is not running"
-  [list]="${snlist}"
-)
-
-declare -A apps_unauth=(
-  [points]=3
-  [text]="Unauthorized application has been removed"
-  [list]="${anlist}"
-)
-
-declare -A apps_auth=(
-  [points]=-10
-  [text]="Critical application has been removed"
-  [list]="${aalist}"
+  [list]=services_unauth_list
 )
 
 #### policy
@@ -166,9 +206,13 @@ policy=(
 #    created in setup.sh
 #    tktk refactor
 
+declare -a forensics_questions_list=(
+  "forensics-1.txt"
+  "forensics-2.txt"
+)
 declare -A forensics_questions
 forensics_questions=(
-  [questions]="forensics-1.txt,forensics-2.txt"
+  [questions]=forensics_questions_list
 )
 
 declare -A forensics_answers

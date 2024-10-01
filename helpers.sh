@@ -34,10 +34,16 @@ configure_users () {
     sonly=${__list[5]}
     group=${__list[6]}
     debug "${FUNCNAME} ${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
+    if [[ "$user" == "$SUDO_USER" ]]; then
+      debug "FATAL: attemted to delete current user"
+      exit
+    fi
     userdel -r $user
     rm -rf /home/$user
     if [[ $creat == 0 ]]; then
       useradd -m $user
+      chown -R $user:$user /home/${user}
+      chmod 0750 /home/${user}
       if [[ $ptype == "plain" ]]; then
         usermod -p $pword $user
       else
