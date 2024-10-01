@@ -19,14 +19,6 @@ echo "copy readme to ${location}"
 cp -f simple_README.html ${location}
 chmod 0644 ${location}/simple_README.html
 
-echo "install forensics questions"
-declare -n list="${forensics_questions[questions]}"
-for file in "${list[@]}"; do
-  cp -f ./forensics/$file $location
-  chown ${cpuser}:${cpuser} ${location}/${file}
-  chmod 0644 ${location}/${file}
-done
-
 echo "create executable"
 cat \
   scoring.sh \

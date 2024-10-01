@@ -4,10 +4,14 @@
 # special case for ssh only. we could expand this later.
 check_fw_rules () {
 #omg this is dumb holy crap
+  add_possible_points 25
   val=$(ufw status numbered | sed 's/\ \ \ */:/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -E -o "22/tcp:ALLOW IN:Anywhere")
   ret=$?
-  debug "${FUNCNAME} ret = ###$ret###"
-  [[ $ret != 0 ]] && record "Firewall rule to allow sshd is not active" -25
+  if [[ $ret != 0 ]]; then
+    record "Firewall rule to allow sshd (tcp/22) is not active" -25
+  else
+    record "Firewall rule to allow sshd (tcp/22) is active" 25
+  fi
 }
 
 check_ufw_enabled () {

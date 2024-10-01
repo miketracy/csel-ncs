@@ -64,8 +64,8 @@ Make sure it's installed.
 You really can't stand solitaire games. Make sure they all find /dev/null.
 
 Since people might be using your rig over ssh. You use openssh-server to provide 
-ssh an sshd server on your rig. You want them to have a desktop environment to 
-use over ssh. X2Go fits that bill exactly. Make sure it's available.
+an sshd server on your rig. You want them to have a desktop environment to use 
+over ssh. X2Go fits that bill exactly. Make sure it's available.
 
 Critical service:
 sshd
@@ -96,7 +96,7 @@ terry
 - Authorized administrator passwords need to be secure.
 - Do not stop or disable simple_scoring services or processes.
 - Do not remove any authorized users or their home directories.
-- You can view your current scoring report by double-clicking the 
+- You can view your current score by double-clicking the
 "scoring_report" desktop icon.
 
 ## ANSWER KEY

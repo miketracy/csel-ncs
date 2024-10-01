@@ -11,14 +11,16 @@ debug () {
 # pass: csv string (no spaces between entries)
 csv2arr () {
   line=$1
-  debug "${FUNCNAME} line = ${line}"
+  debug "${FUNCNAME[0]} line = ${line}"
   readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
 }
 
 add_possible_points () {
   points=$1
+  debug "${FUNCNAME[0]}\t\t$points"
   [[ points -ge 0 ]] && ((possible_points += points))
 }
+
 # configure users in setup
 configure_users () {
   apt install whois # make sure we have mkpasswd

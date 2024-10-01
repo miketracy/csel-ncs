@@ -65,6 +65,14 @@ cp -f orig/common-* /etc/pam.d/
 cp -f orig/login.defs /etc/
 cp -f orig/sysctl.conf /etc/
 
+echo "install forensics questions"
+declare -n list="${forensics_questions[questions]}"
+for file in "${list[@]}"; do
+  cp -f ./forensics/$file $location
+  chown ${cpuser}:${cpuser} ${location}/${file}
+  chmod 0644 ${location}/${file}
+done
+
 # make some music
 EICAR='X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
 declare -n hash=contraband_files
@@ -74,3 +82,7 @@ mkdir -p $location
 for file in "${list[@]}"; do
   echo $EICAR > ${location}/${file}
 done
+
+# get rid of cracklib
+apt purge libpam-cracklib
+apt autoremove -y

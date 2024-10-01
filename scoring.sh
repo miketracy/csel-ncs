@@ -140,8 +140,8 @@ check_apps_unauth () {
 check_forensics () {
   declare -n hash=forensics_answers
   for file in "${!hash[@]}"; do
-    add_possible_points ${hash[points]}
     if [[ -f "${location}/${file}" ]]; then
+      add_possible_points ${hash[points]}
       ans=$(grep -E -o ANSWER.* ${location}/${file} | sed 's/ANSWER:\ //g')
       if [[ $ans == "${hash["$file"]}" ]]; then
         record "${hash[text]}: ${file}" ${hash[points]}
