@@ -16,8 +16,6 @@ fi
 source ./config.sh
 source ./helpers.sh
 
-declare -a __list
-
 # add groups
 declare -n list=groups_create_list
 for group in "${list[@]}"; do
@@ -45,17 +43,6 @@ done
 
 # special case downgrade thunderbird
 apt --allow-downgrades install thunderbird=1:91.8.0+build2-0ubuntu1 -y
-
-# add administrators
-csv2arr "${zalist}"
-for user in "${__list[@]}"; do
-  gpasswd -a $user sudo
-done
-
-csv2arr "${znlist}"
-for user in "${__list[@]}"; do
-  gpasswd -a $user sudo
-done
 
 # set up users
 configure_users

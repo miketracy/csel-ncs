@@ -10,15 +10,11 @@ declare -A modules=(
 
 #### setup varibles
 #
-cpuser=${SUDO_USER} #your currently logged in user
+cpuser=campy #your currently logged in user
 location="/home/${cpuser}/Desktop/"
 
 #### lists for checks
 #
-declare -a users_auth_list=(
-  "barry" "carry" "garry" "harry" "jerry"
-  "kerri" "larry" "mary" "perry" "terry"
-)
 
 declare -a users_create_list=(
   "jennifer"
@@ -32,7 +28,7 @@ declare -a admins_auth_list=(
 )
 
 declare -a admins_unauth_list=(
-  "garry"
+  "garry" "carry"
 )
 
 declare -a groups_create_list=(
@@ -76,13 +72,13 @@ declare -A users_config=(
   [barry]="0,yescrypt,${spasswd},1,1,0,warriors"
   [carry]="0,yescrypt,${spasswd},1,1,0,"
   [garry]="0,yescrypt,${spasswd},1,1,0,"
-  [harry]="0,plain,iamapassword,1,0,0,"
+  [harry]="0,plain,!,1,0,0,"
   [jerry]="0,sha-512,${spasswd},1,0,0,"
   [kerri]="0,sha-512,${spasswd},1,0,0,"
-  [larry]="0,yescrypt,${spasswd},1,1,0,"
+  [larry]="0,plain,!,1,1,0,"
   [mary]="0,md5,${spasswd},1,0,0,"
   [perry]="0,sha-256,${spasswd},1,0,0,"
-  [terry]="0,plain,derpydoo,1,0,0,"
+  [terry]="0,plain,!,1,0,0,"
   [inky]="0,yescrypt,${spasswd},0,0,0,"
   [pinky]="0,yescrypt,${spasswd},0,0,0,"
   [blinky]="0,yescrypt,${spasswd},0,0,0,"
@@ -101,6 +97,7 @@ declare -a users_in_group_list=(
 )
 declare -A users_in_group=(
   [points]=3
+  [type]=user_in_group
   [name]="warriors"
   [list]=users_in_group_list
 )
@@ -112,6 +109,7 @@ declare -a contraband_files_list=(
 )
 declare -A contraband_files=(
   [points]=3
+  [type]=file_exists
   [text]="Contraband file has been removed"
   [location]="/home/garry/Music/"
   [files]=contraband_files_list
@@ -119,30 +117,39 @@ declare -A contraband_files=(
 
 declare -A admins_auth=(
   [points]=-10
+  [type]=admin_exists
   [text]="Authorized administrator has been removed"
   [list]=admins_auth_list
 )
 
 declare -A admins_unauth=(
   [points]=3
+  [type]=admin_exists
   [text]="Unauthorized administrator has been removed"
   [list]=admins_unauth_list
 )
 
+declare -a users_auth_list=(
+  "barry" "carry" "garry" "harry" "jerry"
+  "kerri" "larry" "mary" "perry" "terry"
+)
 declare -A users_auth=(
   [points]=-10
+  [type]=user_exists
   [text]="Authorized user has been removed"
   [list]=users_auth_list
 )
 
 declare -A users_unauth=(
   [points]=3
+  [type]=user_exists
   [text]="Unauthorized user has been removed"
   [list]=users_unauth_list
 )
 
 declare -A groups_create=(
   [points]=3
+  [type]=group_exists
   [text]="Required group has been created"
   [list]=groups_create_list
 )
@@ -151,24 +158,28 @@ declare -A groups_create=(
 
 declare -A apps_upgrade=(
   [points]=3
+  [type]=package_upgradable
   [text]="Package has been updated"
   [list]=apps_upgrade_list
 )
 
 declare -A apps_install=(
   [points]=3
+  [type]=package_installed
   [text]="Required package has been installed"
   [list]=apps_install_list
 )
 
 declare -A apps_unauth=(
   [points]=3
+  [type]=package_installed
   [text]="Unauthorized application has been removed"
   [list]=apps_unauth_list
 )
 
 declare -A apps_critical=(
   [points]=-10
+  [type]=package_installed
   [text]="Critical application has been removed"
   [list]=apps_critical_list
 )
@@ -176,12 +187,14 @@ declare -A apps_critical=(
 #tktk
 declare -A svcs_auth=(
   [points]=-10
+  [type]=sercice_active
   [text]="Critical service is not running"
   [list]=services_critical_list
 )
 
 declare -A svcs_unauth=(
   [points]=6
+  [type]=service_active
   [text]="Unauthorized servive is not running"
   [list]=services_unauth_list
 )
@@ -200,6 +213,7 @@ policy=(
   [permitroot]="Root logins via ssh have been disabled"
   [pwnullok]="Null password logins are disabled"
   [fwactive]="UFW firewall is enabled and running"
+  [auditd]="auditd is enabled and running"
 )
 
 #### forensics questions

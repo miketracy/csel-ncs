@@ -1,23 +1,27 @@
-#!/usr/bin/env bash
-# debug echo
+
 debug () {
   if [[ $debug -eq 0 ]]; then
-    echo "$@" >&2
+    echo "DEBUG[${FUNCNAME[1]}] $@" >&2
   fi
 }
 
-# hack to create a global variable with an array parsed from a csv list
-# global: __list
-# pass: csv string (no spaces between entries)
+# pass: array_name [delimiter] csv
 csv2arr () {
-  line=$1
-  debug "${FUNCNAME[0]} line = ${line}"
-  readarray -d ',' -t __list < <(printf $line) # use printf to prevent trailing \n
+  local -n retarr=$1
+  if [[ -z $3 ]]; then
+    delimiter=","
+    line=$2
+  else
+    delimiter=$2
+    line=$3
+  fi
+  debug "csv2arr[${FUNCNAME[1]}] $retarr delimiter = ${delimiter} line = ${line}"
+  readarray -d $delimiter -t retarr < <(printf $line) # use printf to prevent trailing \n
 }
 
 add_possible_points () {
   points=$1
-  debug "${FUNCNAME[0]}\t\t$points"
+  debug "POSSIBLE: [${FUNCNAME[1]}] -- $points points"
   [[ points -ge 0 ]] && ((possible_points += points))
 }
 
@@ -27,18 +31,19 @@ configure_users () {
   for user in "${!users_config[@]}"; do
     # dumbest way to handle a struct ever
     # and I hate bash for true=0 and false=1
-    csv2arr "${users_config[$user]}"
-    creat=${__list[0]}
-    ptype=${__list[1]}
-    pword=${__list[2]}
-    is_auth=${__list[3]}
-    is_admin=${__list[4]}
-    sonly=${__list[5]}
-    group=${__list[6]}
-    debug "${FUNCNAME} ${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
+    local list
+    csv2arr "list" "${users_config[$user]}"
+    creat=${list[0]}
+    ptype=${list[1]}
+    pword=${list[2]}
+    is_auth=${list[3]}
+    is_admin=${list[4]}
+    sonly=${list[5]}
+    group=${list[6]}
+    debug "${FUNCNAME[1]} ${creat} | ${user} | ${ptype} | ${pword} | ${is_auth} | ${is_admin} | ${sonly} | ${group} "
     if [[ "$user" == "$SUDO_USER" ]]; then
       debug "FATAL: attemted to delete current user"
-      exit
+      exit 99
     fi
     userdel -r $user
     rm -rf /home/$user
@@ -54,66 +59,9 @@ configure_users () {
       [[ $is_admin -eq 1 ]] && gpasswd -a $user sudo
       [[ $sonly -eq 1 ]] && sed '/^${user}.*/d' /etc/passwd
     else
-      debug "${FUNCNAME} SKIPPING ${user}"
+      debug "${FUNCNAME[1]} SKIPPING ${user}"
     fi
   done
-}
-
-# pass $packagename
-# return:
-#   2 = not installed
-#   1 = installed and not upgradble
-#   0 = installed and upgradable
-is_upgradable () {
-  $(is_installed $1)
-  insret=$?
-  [[ $insret -eq 1 ]] && return 2
-  ret=$(apt list --upgradable 2>/dev/null | grep ^$1)
-  upgret=$?
-  return $upgret
-}
-
-#pass $packagename
-is_installed () {
-# this is as hacky as it gets and I hate it
-  ret=$(tail -1 <(dpkg -l $1 2>&1) |\
-     tr -s " " | cut -f3 -d" " | grep -E -o -e "packages" -e "<none>")
-  if [[ $? -eq 0 ]]; then
-    return 1
-  else
-    return 0
-  fi
-#  echo $?
-}
-
-# pass $username
-exist_admin () {
-  ret=$(getent group sudo | grep -E -o $1)
-  echo $?
-}
-
-# pass $username
-exist_user () {
-  ret=$(getent passwd $1)
-  echo $?
-}
-
-# pass $groupname
-exist_group () {
-  ret=$(getent group $1)
-  echo $?
-}
-
-# pass $servicename
-exist_service () {
-  ret=$(systemctl is-active $1)
-  echo $?
-}
-
-# pass $group $user
-exist_user_in_group () {
-  ret=$(getent group $1 | grep -E -o $2)
-  echo $?
 }
 
 footer="
@@ -153,4 +101,3 @@ write_html () {
   echo $footer >> $file
   cp $file /mnt/z/
 }
-#---- END helpers.sh

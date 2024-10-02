@@ -1,5 +1,5 @@
 
-declare -a stig_services_disabled=(
+declare -a stig_services_remove_list=(
   "apache2" "autofs" "avahi-daemon" "bind9" "bluez" "cups" "dnsmasq"
   "dovecot-imapd" "ftp" "isc-dhcp-server" "ldap-utils"
   "nginx" "nfs-kernel-server" "nis" "rpcbind" "rsh-client" "rsync"
@@ -7,7 +7,7 @@ declare -a stig_services_disabled=(
   "vsftpd" "xinetd" "xserver-common" "ypserv"
 )
 
-declare -a stig_sysctl_config=(
+declare -a stig_sysctl_config_list=(
 # configure ICMP
   "net.ipv4.icmp_echo_ignore_all=1"
   "net.ipv4.icmp_echo_ignore_broadcasts=1"
@@ -39,30 +39,73 @@ declare -a stig_sysctl_config=(
   "net.ipv6.conf.lo.disable_ipv6=1"
 )
 
-declare -a stig_sshd_config
-stig_sshd_config+=("PermitRootLogin no")
-stig_sshd_config+=("Protocol 2")
-stig_sshd_config+=("DisableForwarding yes")
-stig_sshd_config+=("GSSAPIAuthentication no")
-stig_sshd_config+=("HostbasedAuthentication no")
-stig_sshd_config+=("IgnoreRhosts yes")
-stig_sshd_config+=("PermitEmptyPasswords no")
-stig_sshd_config+=("PermitUserEnvironment no")
-stig_sshd_config+=("UsePAM yes")
+declare -a stig_sshd_config_list
+stig_sshd_config_list+=("PermitRootLogin no")
+stig_sshd_config_list+=("Protocol 2")
+stig_sshd_config_list+=("DisableForwarding yes")
+stig_sshd_config_list+=("GSSAPIAuthentication no")
+stig_sshd_config_list+=("HostbasedAuthentication no")
+stig_sshd_config_list+=("IgnoreRhosts yes")
+stig_sshd_config_list+=("PermitEmptyPasswords no")
+stig_sshd_config_list+=("PermitUserEnvironment no")
+stig_sshd_config_list+=("UsePAM yes")
 
-declare -a stig_lightdm_config=(
+declare -a stig_lightdm_config_list=(
   "allow-guest=false"
   "greeter-hide-users=true"
   "greeter-show-manual-login=true"
 )
 
+declare -a stig_gdm3_config_list=(
+  "tktk not implemented"
+)
+
+declare -A stig_services_running=(
+  [points]=10
+  [text]="Services are securely configured"
+  [type]=service_running
+  [list]=stig_services_remove_list
+)
+
+declare -A stig_sysctl_config=(
+  [points]=10
+  [type]=has_line
+  [text]="systcl is securely configured"
+  [file]="/etc/sysctl.conf"
+  [list]=stig_sysctl_config_list
+)
+
+declare -A stig_sshd_config=(
+  [points]=10
+  [text]="sshd_config is securely configured"
+  [type]=has_line
+  [file]="/etc/ssh/sshd_config"
+  [list]=stig_sysctl_config_list
+)
+
+declare -A stig_lightdm_config=(
+  [points]=10
+  [text]="lightdm is securely configured"
+  [type]=has_line
+  [file]="tktk not implemented"
+  [list]=stig_lightdm_config_list
+)
+
+declare -A stig_gdm3_config=(
+  [points]=10
+  [text]="gdm3 is securely configured"
+  [type]=has_line
+  [file]="tktk not implemented"
+  [list]=stig_gdm3_config_list
+)
+
 # store the name of the array to use as a reference
 # declare -n list="${stig_checks[$key]}"
 # this is a working hack and I do not know why
-declare -A stig_checks=(
-  [points]=7
-  [services]=stig_services_disabled
-  [sysctl]=stig_sysctl_config
-  [sshd]=stig_sshd_config
-  [lightdm]=stig_lightdm_config
-)
+#declare -A stig_checks=(
+#  [points]=7
+#  [services]=stig_services_disabled
+#  [sysctl]=stig_sysctl_config
+#  [sshd]=stig_sshd_config
+#  [lightdm]=stig_lightdm_config
+#)

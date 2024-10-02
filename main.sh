@@ -20,6 +20,7 @@ source ./config.sh
 source ./config_policy.sh
 source ./config_stig.sh
 source ./helpers.sh
+source ./tests.sh
 
 record () {
   txt=$1
@@ -29,7 +30,7 @@ record () {
   else
     style='style="color:black"'
   fi
-  results+=("<span ${style}>${txt} -- ${points} points</span><br />")
+  results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${points} points</span><br />")
   ((total_points += $points))
 }
 
@@ -60,7 +61,7 @@ if [[ ${modules[users]} -eq 0 ]]; then
     "check_unauth_admins"
     "check_group_add"
     "check_user_in_group"
-    "check_passwd_changed"   # tktk make sure designated users aren't \! in shadow
+    "check_password_changed"   # tktk make sure designated users aren't \! in shadow
   )
 fi
 

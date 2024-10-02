@@ -5,8 +5,7 @@
 check_fw_rules () {
 #omg this is dumb holy crap
   add_possible_points 25
-  val=$(ufw status numbered | sed 's/\ \ \ */:/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -E -o "22/tcp:ALLOW IN:Anywhere")
-  ret=$?
+  ret=$(ufw_rule_exists '22/tcp|ALLOW IN|Anywhere')
   if [[ $ret != 0 ]]; then
     record "Firewall rule to allow sshd (tcp/22) is not active" -25
   else
@@ -24,8 +23,8 @@ check_ufw_enabled () {
 check_updates () {
   declare -n hash=policy
   add_possible_points ${hash[points]}
-  upgrades=$(apt list --upgradable 2>/dev/null | wc -l)
-  [[ ${upgrades} -le 1 ]] && record "${hash[updates]}" ${hash[points]}
+  updates=$(apt list --upgradable 2>/dev/null | wc -l)
+  [[ ${updates} -le 1 ]] && record "${hash[updates]}" ${hash[points]}
 }
 
 # these are all greps into system files to ensure proper configuration
@@ -33,16 +32,20 @@ check_pwage () {
   declare -n hash=policy
   add_possible_points ${hash[points]}
   file="/etc/login.defs"
-  age=$(grep ^PASS_MAX_DAYS $file |  cut -f2)
-  [[ $age =~ [[:digit:]] && $age -le 90 ]] && record "${hash[pwage]}" ${hash[points]}
+  ret=$(has_value $file "^PASS_MAX_DAYS" le 90)
+  debug $ret
+  [[ $ret -eq 0 ]] && record "${hash[pwage]}" ${hash[points]}
 }
 
 check_pwminlen () {
   declare -n hash=policy
   add_possible_points ${hash[points]}
   file="/etc/pam.d/common-password"
-  val=$(grep -E -o minlen=[0-9]+ $file | cut -f2 -d=)
-  [[ $val -ge 8 ]] && record "${hash[pwminlen]}" ${hash[points]}
+  ret=$(has_value $file "minlen" ge 8)
+  debug "ret=###$ret###"
+#  val=$(grep -E -o minlen=[0-9]+ $file | cut -f2 -d=)
+#  [[ $val -ge 8 ]] && record "${hash[pwminlen]}" ${hash[points]}
+  [[ $ret -eq 0 ]] && record "${hash[pwminlen]}" ${hash[points]}
 }
 
 check_pwhistory () {

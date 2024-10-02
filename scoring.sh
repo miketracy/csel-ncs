@@ -5,7 +5,7 @@ check_user_in_group () {
   group="${hash[name]}"
   for user in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(exist_user_in_group $group $user)
+    ret=$(user_in_group $group $user)
     if [[ $ret -eq 0 ]]; then
       record "User $user has been added to $group" ${hash[points]}
     fi
@@ -18,7 +18,7 @@ check_group_add () {
   for group in "${list[@]}"; do
     add_possible_points ${hash[points]}
     debug "($FUNCNAME) group = $group"
-    ret=$(exist_group $group)
+    ret=$(group_exists $group)
     if [[ $ret -eq 0 ]]; then
       record "${hash[text]}: ${group}" ${hash[points]}
     fi
@@ -30,7 +30,7 @@ check_auth_users () {
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
 #    add_possible_points ${hash[points]}
-    ret=$(exist_user $user)
+    ret=$(user_exists $user)
     if [[ $ret -ne 0 ]]; then
       record "${hash[text]}: $user" ${hash[points]}
     fi
@@ -42,7 +42,7 @@ check_auth_admins () {
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
 #    add_possible_points ${hash[points]}
-    ret=$(exist_admin $user)
+    ret=$(admin_exists $user)
     if [[ $ret -ne 0 ]]; then
       record "${hash[text]}: $user" ${hash[points]}
     fi
@@ -54,7 +54,7 @@ check_unauth_users () {
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(exist_user $user)
+    ret=$(user_exists $user)
     if [[ $ret -ne 0 ]]; then
       record "${hash[text]}: $user" ${hash[points]}
     fi
@@ -66,7 +66,7 @@ check_unauth_admins () {
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(exist_admin $user)
+    ret=$(admin_exists $user)
     if [[ $ret -ne 0 ]]; then
       record "${hash[text]}: $user" ${hash[points]}
     fi
@@ -78,9 +78,8 @@ check_apps_critical () {
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
 #    add_possible_points ${hash[points]}
-    ret=$(is_installed $app)
-    insret=$?
-    if [[ $insret -ne 0 ]]; then
+    ret=$(package_installed $app)
+    if [[ $ret -ne 0 ]]; then
       record "${hash[text]}: $app" ${hash[points]}
     fi
   done
@@ -91,9 +90,8 @@ check_apps_upgrade () {
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(is_upgradable $app)
-    upgret=$?
-    if [[ $upgret == 1 ]]; then
+    ret=$(package_upgradable $app)
+    if [[ $ret -eq 1 ]]; then
       record "${hash[text]}: $app" ${hash[points]}
     fi
   done
@@ -116,9 +114,8 @@ check_apps_install () {
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(is_installed $app)
-    insret=$?
-    if [[ $insret == 0 ]]; then
+    ret=$(package_installed $app)
+    if [[ $ret -eq 0 ]]; then
       record "${hash[text]}: $app" ${hash[points]}
     fi
   done
@@ -129,9 +126,8 @@ check_apps_unauth () {
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    ret=$(is_installed $app)
-    insret=$?
-    if [[ $insret == 1 ]]; then
+    ret=$(package_installed $app)
+    if [[ $ret -eq 1 ]]; then
       record "${hash[text]}: $app" ${hash[points]}
     fi
   done
