@@ -1,4 +1,19 @@
 
+# check user's password has been changed
+check_password_change () {
+  local -n hash=password_change
+  local -n list="${hash[list]}"
+  for user in "${list[@]}"; do
+    add_possible_points ${hash[points]}
+    local -A entry=()
+    get_user_entry $user
+    ret=$(password_is $user "${entry[passwd]}")
+    if [[ $ret -ne 0 ]]; then
+      record "${hash[text]}: $user" ${hash[points]}
+    fi
+  done
+}
+
 check_user_in_group () {
   declare -n hash=users_in_group
   declare -n list="${hash[list]}"
@@ -17,7 +32,6 @@ check_group_add () {
   declare -n list="${hash[list]}"
   for group in "${list[@]}"; do
     add_possible_points ${hash[points]}
-    debug "($FUNCNAME) group = $group"
     ret=$(group_exists $group)
     if [[ $ret -eq 0 ]]; then
       record "${hash[text]}: ${group}" ${hash[points]}
@@ -25,7 +39,7 @@ check_group_add () {
   done
 }
 
-check_auth_users () {
+check_users_auth () {
   declare -n hash=users_auth
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
@@ -37,7 +51,7 @@ check_auth_users () {
   done
 }
 
-check_auth_admins () {
+check_admins_auth () {
   declare -n hash=admins_auth
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
@@ -49,7 +63,7 @@ check_auth_admins () {
   done
 }
 
-check_unauth_users () {
+check_users_unauth () {
   declare -n hash=users_unauth
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
@@ -61,7 +75,7 @@ check_unauth_users () {
   done
 }
 
-check_unauth_admins () {
+check_admins_unauth () {
   declare -n hash=admins_unauth
   declare -n list="${hash[list]}"
   for user in "${list[@]}"; do
@@ -73,8 +87,44 @@ check_unauth_admins () {
   done
 }
 
-check_apps_critical () {
-  declare -n hash=apps_critical
+check_services_critical () {
+  declare -n hash=services_critical
+  declare -n list="${hash[list]}"
+  for svc in "${list[@]}"; do
+#    add_possible_points ${hash[points]}
+    ret=$(service_active $svc)
+    if [[ $ret -ne 0 ]]; then
+      record "${hash[text]}: $svc" ${hash[points]}
+    fi
+  done
+}
+
+check_services_unauth () {
+  declare -n hash=services_unauth
+  declare -n list="${hash[list]}"
+  for svc in "${list[@]}"; do
+    add_possible_points ${hash[points]}
+    ret=$(service_active $svc)
+    if [[ $ret -ne 0 ]]; then
+      record "${hash[text]}: $svc" ${hash[points]}
+    fi
+  done
+}
+
+check_services_installed () {
+  declare -n hash=services_installed
+  declare -n list="${hash[list]}"
+  for svc in "${list[@]}"; do
+    add_possible_points ${hash[points]}
+    ret=$(service_active $svc)
+    if [[ $ret -eq 0 ]]; then
+      record "${hash[text]}: $svc" ${hash[points]}
+    fi
+  done
+}
+
+check_packages_critical () {
+  declare -n hash=packages_critical
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
 #    add_possible_points ${hash[points]}
@@ -85,8 +135,8 @@ check_apps_critical () {
   done
 }
 
-check_apps_upgrade () {
-  declare -n hash=apps_upgrade
+check_packages_upgrade () {
+  declare -n hash=packages_upgrade
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}
@@ -102,15 +152,16 @@ check_contraband () {
   loc="${hash[location]}"
   declare -n list="${hash[files]}"
   for file in "${list[@]}"; do
-    add_possible_points ${hash[points]}
-    if [[ ! -f ${loc}/${file} ]]; then
-      record "${hash[text]}: $file" ${hash[points]}
+    add_possible_points "${hash[points]}"
+    debug "${loc}/${file}"
+    if [[ ! -f "${loc}/${file}" ]]; then
+      record "${hash[text]}: $file" "${hash[points]}"
     fi
   done
 }
 
-check_apps_install () {
-  declare -n hash=apps_install
+check_packages_installed () {
+  declare -n hash=packages_installed
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}
@@ -121,8 +172,8 @@ check_apps_install () {
   done
 }
 
-check_apps_unauth () {
-  declare -n hash=apps_unauth
+check_packages_unauth () {
+  declare -n hash=packages_unauth
   declare -n list="${hash[list]}"
   for app in "${list[@]}"; do
     add_possible_points ${hash[points]}

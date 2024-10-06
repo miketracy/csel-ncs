@@ -23,29 +23,48 @@ for group in "${list[@]}"; do
 done
 
 # add packages
-declare -n list=apps_unauth_list
+declare -n list=packages_unauth_list
 for pkg in "${list[@]}"; do
   apt install $pkg -y
 done
 
+declare -n list=services_unauth_list
+for pkg in "${list[@]}"; do
+  apt install $pkg -y
+  systemctl start $pkg
+done
+
 # remove packages
-declare -n list=apps_critical_list
+declare -n list=packages_critical_list
 for pkg in "${list[@]}"; do
   apt purge $pkg -y
   apt autoremove -y
 done
 
-declare -n list=apps_install_list
+declare -n list=packages_install_list
 for pkg in "${list[@]}"; do
   apt purge $pkg -y
   apt autoremove -y
 done
 
 # special case downgrade thunderbird
+#apt purge thunderbird
+#apt autoremove -y
 apt --allow-downgrades install thunderbird=1:91.8.0+build2-0ubuntu1 -y
+
+# get rid of cracklib
+apt purge libpam-cracklib -y
+apt autoremove -y
 
 # set up users
 configure_users
+
+# insecure perms in /home/
+chmod 755 /home/kerri
+
+# root interactive login
+passwd -u root
+usermod -p $(mkpasswd -m yescrypt Pat42#ncs) root
 
 # install orig files
 cp -f orig/common-* /etc/pam.d/
@@ -64,12 +83,9 @@ done
 EICAR='X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
 declare -n hash=contraband_files
 location="${hash[location]}"
+debug "${location}"
 declare -n list="${hash[files]}"
-mkdir -p $location
+mkdir -p "${location}"
 for file in "${list[@]}"; do
-  echo $EICAR > ${location}/${file}
+  echo "$EICAR" > "${location}/${file}"
 done
-
-# get rid of cracklib
-apt purge libpam-cracklib
-apt autoremove -y

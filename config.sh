@@ -12,10 +12,13 @@ declare -A modules=(
 #
 cpuser=campy #your currently logged in user
 location="/home/${cpuser}/Desktop/"
+spasswd="Pat42#ncs"
+
 
 #### lists for checks
-#
 
+#### users and groups
+#
 declare -a users_create_list=(
   "jennifer"
 )
@@ -35,47 +38,47 @@ declare -a groups_create_list=(
   "warriors" "noobs"
 )
 
-declare -a apps_upgrade_list=(
+#### packages and services
+#
+declare -a packages_upgrade_list=(
   "firefox" "thunderbird" "ufw" "openssh-server"
 )
 
-declare -a apps_install_list=(
-  "ruby" "x2goserver"
+declare -a packages_install_list=(
+  "ruby" "x2goserver" "libpam-cracklib" "clamav"
 )
 
-declare -a apps_critical_list=(
-  "openssh-server" "ufw"
+declare -a packages_critical_list=(
+  "openssh-server" "ufw" "auditd"
 )
 
-declare -a apps_unauth_list=(
-  "nginx" "nginx-common" "nginx-core" "wireshark"
-  "vsftpd" "aisleriot" "qbittorrent" "ophcrack"
+declare -a packages_unauth_list=(
+  "wireshark" "aisleriot" "qbittorrent" "ophcrack" "telnetd"
 )
 
-declare -a svcs_critical_list=(
+declare -a services_critical_list=(
   "sshd"
 )
 
-declare -a svcs_unauth_list=(
+declare -a services_installed_list=(
+  "auditd" "clamav-freshclam"
+)
+
+declare -a services_unauth_list=(
   "nginx" "vsftpd"
 )
 
-#ppasswd="kerri" "sohappy" # user with plaintext password
-#ushadow="haxor"
-
-spasswd="Pat42#ncs"
-
 #### set up all users and their group memberships
 #    in setup, this will set each user's password to the indicated type and value
-#    [username]="create,type,password,is_auth,is_admin,shadow_only,group membership
+#    [username]="create,algo,password,is_auth,is_admin,shadow_only,group membership
 declare -A users_config=(
-  [barry]="0,yescrypt,${spasswd},1,1,0,warriors"
+  [barry]="0,yescrypt,z!pit3do0D4h,1,1,0,warriors"
+  [larry]="0,yescrypt,fnork,1,1,0,"
   [carry]="0,yescrypt,${spasswd},1,1,0,"
   [garry]="0,yescrypt,${spasswd},1,1,0,"
   [harry]="0,plain,!,1,0,0,"
   [jerry]="0,sha-512,${spasswd},1,0,0,"
   [kerri]="0,sha-512,${spasswd},1,0,0,"
-  [larry]="0,plain,!,1,1,0,"
   [mary]="0,md5,${spasswd},1,0,0,"
   [perry]="0,sha-256,${spasswd},1,0,0,"
   [terry]="0,plain,!,1,0,0,"
@@ -87,19 +90,28 @@ declare -A users_config=(
   [jennifer]="1,yescrypt,${spasswd},0,0,0,warriors"
 )
 
-#### users and groups
 
 # special case. these users belong in this group.
 # tktk refactor
+declare -a password_change_list=(
+  "larry"
+)
+declare -A password_change=(
+  [points]=3
+  [type]=password_is
+  [list]=password_change_list
+  [text]="Insecure password has been changed"
+)
+
 declare -a users_in_group_list=(
-  "jennifer"
-  "barry"
+  "jennifer" "barry"
 )
 declare -A users_in_group=(
   [points]=3
   [type]=user_in_group
   [name]="warriors"
   [list]=users_in_group_list
+  [text]="User has been added to group"
 )
 
 declare -a contraband_files_list=(
@@ -110,23 +122,23 @@ declare -a contraband_files_list=(
 declare -A contraband_files=(
   [points]=3
   [type]=file_exists
-  [text]="Contraband file has been removed"
   [location]="/home/garry/Music/"
   [files]=contraband_files_list
+  [text]="Contraband file has been removed"
 )
 
 declare -A admins_auth=(
   [points]=-10
-  [type]=admin_exists
-  [text]="Authorized administrator has been removed"
+  [type]=admin_exists_not
   [list]=admins_auth_list
+  [text]="Authorized administrator has been removed"
 )
 
 declare -A admins_unauth=(
   [points]=3
   [type]=admin_exists
-  [text]="Unauthorized administrator has been removed"
   [list]=admins_unauth_list
+  [text]="Unauthorized administrator has been removed"
 )
 
 declare -a users_auth_list=(
@@ -135,68 +147,75 @@ declare -a users_auth_list=(
 )
 declare -A users_auth=(
   [points]=-10
-  [type]=user_exists
-  [text]="Authorized user has been removed"
+  [type]=user_exists_not
   [list]=users_auth_list
+  [text]="Authorized user has been removed"
 )
 
 declare -A users_unauth=(
   [points]=3
   [type]=user_exists
-  [text]="Unauthorized user has been removed"
   [list]=users_unauth_list
+  [text]="Unauthorized user has been removed"
 )
 
 declare -A groups_create=(
   [points]=3
   [type]=group_exists
-  [text]="Required group has been created"
   [list]=groups_create_list
+  [text]="Required group has been created"
 )
 
 #### files, apps and services
 
-declare -A apps_upgrade=(
+declare -A packages_upgrade=(
   [points]=3
   [type]=package_upgradable
+  [list]=packages_upgrade_list
   [text]="Package has been updated"
-  [list]=apps_upgrade_list
 )
 
-declare -A apps_install=(
+declare -A packages_installed=(
   [points]=3
   [type]=package_installed
+  [list]=packages_install_list
   [text]="Required package has been installed"
-  [list]=apps_install_list
 )
 
-declare -A apps_unauth=(
+declare -A packages_unauth=(
   [points]=3
-  [type]=package_installed
+  [type]=package_installed_not
+  [list]=packages_unauth_list
   [text]="Unauthorized application has been removed"
-  [list]=apps_unauth_list
 )
 
-declare -A apps_critical=(
+declare -A packages_critical=(
   [points]=-10
-  [type]=package_installed
+  [type]=package_installed_not
+  [list]=packages_critical_list
   [text]="Critical application has been removed"
-  [list]=apps_critical_list
 )
 
 #tktk
-declare -A svcs_auth=(
+declare -A services_critical=(
   [points]=-10
-  [type]=sercice_active
-  [text]="Critical service is not running"
+  [type]=service_active_not
   [list]=services_critical_list
+  [text]="Critical service is not running"
 )
 
-declare -A svcs_unauth=(
+declare -A services_unauth=(
+  [points]=6
+  [type]=service_active_not
+  [list]=services_unauth_list
+  [text]="Unauthorized service is not running"
+)
+
+declare -A services_installed=(
   [points]=6
   [type]=service_active
-  [text]="Unauthorized servive is not running"
-  [list]=services_unauth_list
+  [list]=services_installed_list
+  [text]="Service is running"
 )
 
 #### policy

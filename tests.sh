@@ -12,17 +12,19 @@
 #   1 = installed and not upgradble
 #   0 = installed and upgradable
 package_upgradable () {
-#  debug "called package_upgradable $1"
   ret=$(package_installed $1)
+  qret=127
   if [[ $ret -eq 1 ]]; then
     qret=2
-  elif [[ $ret -eq 0 ]]; then
-#    debug "package_upgradable $1 : $ret : $?"
-    ret=$(apt list --upgradable 2>/dev/null | grep ^$1)
-    qret=1
   else
-    qret=0
+    ret=$(apt list --upgradable 2>/dev/null | grep ^$1)
+    if [[ $? -eq 1 ]]; then
+      qret=1
+    else
+      qret=0
+    fi
   fi
+  debug "$1 $qret"
   echo $qret
 }
 
@@ -36,7 +38,6 @@ package_installed () {
   else
     qret=0
   fi
-#  debug "package_installed $1 $qret"
   echo $qret
 }
 
@@ -66,10 +67,10 @@ ufw_is_active () {
 # there's simply got to be a better way -ed
 ufw_rule_exists () {
   rule=$1
-  debug $rule
-  test=$(ufw status numbered | sed 's/\ \ \ */|/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -E -o '$rule')
-  debug $test
-  echo $?
+  test=$(ufw status numbered | sed 's/\ \ \ */|/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -o "$rule")
+  ret=$?
+  debug "$rule ## $test"
+  echo $ret
 }
 
 # pass $file $pattern
@@ -86,29 +87,34 @@ has_value () {
   key=$2
   compare=$3
   value=$4
+  debug "$file $key $compare $value"
 #  rval=$(grep -E -o -e ${key}=[0-9]+ -e ${key}\s+[0-9]+ $file) # | cut -f2 -d=)
-  rval=$(grep -E -o ${key}.+\[0-9\]+ $file)
+#  rval=$(grep -E -o ${key}\[\=\s]+\[0-9\]+ $file)
+  rval=$(grep -E -o "${key}(\s+|=)+[0-9]+" $file)
+  [[ "$?" -ne 0 ]] && return 127
+  debug "[$?] orig $rval"
   rval=$(echo $rval | tr -s " " | sed 's/[[:blank:]]/=/')
+  debug "spaces to = $rval"
   rval=$(echo $rval | cut -f2 -d=)
-  debug "$file $key $compare $value ###$rval###"
-  qret=101
+  debug "value $rval"
+  qret=1
   case $compare in
-    "lt") [[ $value -lt $rval ]] && qret=0;;
-    "gt") [[ $value -gt $rval ]] && qret=0;;
-    "le") [[ $value -le $rval ]] && qret=0;;
-    "ge") [[ $value -ge $rval ]] && qret=0;;
-    "eq") [[ $value -eq $rval ]] && qret=0;;
-    "ne") [[ $value -ne $rval ]] && qret=0;;
+    "lt") [[ $rval -lt $value ]] && qret=0;;
+    "gt") [[ $rval -gt $value ]] && qret=0;;
+    "le") [[ $rval -le $value ]] && qret=0;;
+    "ge") [[ $rval -ge $value ]] && qret=0;;
+    "eq") [[ $rval -eq $value ]] && qret=0;;
+    "ne") [[ $rval -ne $value ]] && qret=0;;
     *) qret=127;;
   esac
-  debug "ret=###$qret###"
-  echo $qret
+  debug "$file $key $compare $value $qret"
+  return $qret
 }
 
 # for lightdm config files
 # pass $directory $pattern
 has_line_any_file () {
-  :
+  : #tktk
 }
 
 # pass $username
@@ -132,7 +138,9 @@ group_exists () {
 # pass $servicename
 service_active () {
   ret=$(systemctl is-active $1)
-  echo $?
+  ret=$?
+  debug "$1 $ret"
+  echo $ret
 }
 
 # pass $group $user
@@ -151,10 +159,15 @@ password_is () {
   hash=$(getent shadow $user | cut -f2 -d:)
   hash=${hash##*$} 
   [[ $hash == "" ]] && return 127
-  cmp=$(mkpasswd -S $salt $ptext)
+  cmp=$(mkpasswd -S "$salt" "$ptext")
   if [[ "$cmp" == "$field" ]]; then
     echo 0
   else
     echo 1
   fi
+}
+
+# pass $file $perms [octal e.g. 750]
+has_permissions () {
+  : # stat -c%a /home/garry
 }

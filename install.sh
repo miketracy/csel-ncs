@@ -36,7 +36,7 @@ echo "create crontab entry"
 if [[ $(crontab -l -u root | grep simple) ]]; then
   :
 else
-  (crontab -l -u root ; echo "* * * * * /usr/bin/bash /usr/local/bin/simple_score")| crontab -
+  (crontab -l -u root ; echo "* * * * * /usr/bin/bash /usr/local/bin/simple_score 2>&1 > /dev/null")| crontab -
 fi
 
 echo "running simple_score"

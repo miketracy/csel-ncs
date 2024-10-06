@@ -1,6 +1,51 @@
 
 #### policy
 #
+
+# check that root console login has been disabled
+# ensure root is usermod -p "!"
+check_root_login () {
+  points=2
+  add_possible_points $points
+  getent shadow root | cut -f2 -d: | grep -o ^\!
+  [[ $? -eq 0 ]] && record "Interactive login for root disabled" $points
+}
+
+# check for secure permissions in /home/
+check_home_perms () {
+  points=2
+  add_possible_points $points
+  ret=$(ls -l /home/ | grep -e total -e ^drwxr-x--- -v | wc -l)
+  [[ "$ret" -eq 0 ]] && record "Permissions in /home/ are secure" $points
+}
+
+# special case
+# check for any non $y$ algos in /etc/shadow
+# make sure users are all chage -d 0
+check_insecure_passwd_algos () {
+  debug "NOT IMPLEMENTED"
+  return 127
+  points=2
+  add_possible_points $points
+  ret=$(cat /etc/shadow | cut -f2 -d: | grep -e '\!$' -e '*$' -e '^\$y\$' -v | wc -l)
+  [[ "$ret" -eq 0 ]] && record "Permissions in /home/ are secure" $points
+}
+
+# special case
+check_shadow_only () {
+  points=6
+  add_possible_points $points
+  ret=$(\
+    diff \
+    <(cat /etc/passwd | cut -f1 -d: | sort) \
+    <(cat /etc/shadow | cut -f1 -d: | sort) \
+  )
+  ret=$?
+  if [[ $ret == 0 ]]; then
+    record "All users in /etc/shadow appear in /etc/passwd" $points
+  fi
+}
+
 # special case for ssh only. we could expand this later.
 check_fw_rules () {
 #omg this is dumb holy crap
@@ -32,9 +77,10 @@ check_pwage () {
   declare -n hash=policy
   add_possible_points ${hash[points]}
   file="/etc/login.defs"
-  ret=$(has_value $file "^PASS_MAX_DAYS" le 90)
-  debug $ret
-  [[ $ret -eq 0 ]] && record "${hash[pwage]}" ${hash[points]}
+  val=$(has_value $file "^PASS_MAX_DAYS" le 90)
+  ret=$?
+  debug "ret=$ret"
+  [[ "$ret" -eq 0 ]] && record "${hash[pwage]}" ${hash[points]}
 }
 
 check_pwminlen () {
@@ -42,9 +88,8 @@ check_pwminlen () {
   add_possible_points ${hash[points]}
   file="/etc/pam.d/common-password"
   ret=$(has_value $file "minlen" ge 8)
-  debug "ret=###$ret###"
-#  val=$(grep -E -o minlen=[0-9]+ $file | cut -f2 -d=)
-#  [[ $val -ge 8 ]] && record "${hash[pwminlen]}" ${hash[points]}
+  ret=$?
+  debug "ret=$ret"
   [[ $ret -eq 0 ]] && record "${hash[pwminlen]}" ${hash[points]}
 }
 
@@ -72,6 +117,7 @@ check_pwquality () {
   add_possible_points ${hash[points]}
   for entry in "${entries[@]}"; do
     ret=$(grep -E -o ${entry}=[0-9-]+ $file | cut -f2 -d=)
+    [[ $? -ne 0 ]] && return 1
     [[ $ret -ne 0 ]] || return 1
   done
   record "${hash[pwquality]}" ${hash[points]}

@@ -1,7 +1,7 @@
 
-declare -a stig_services_remove_list=(
-  "apache2" "autofs" "avahi-daemon" "bind9" "bluez" "cups" "dnsmasq"
-  "dovecot-imapd" "ftp" "isc-dhcp-server" "ldap-utils"
+declare -a stig_services_disable_list=(
+  "apache2" "autofs" "avahi-daemon" "bind9" "bluetooth" "bluez" "cups"
+  "dnsmasq" "dovecot-imapd" "ftp" "isc-dhcp-server" "ldap-utils"
   "nginx" "nfs-kernel-server" "nis" "rpcbind" "rsh-client" "rsync"
   "samba" "slapd" "snmpd" "squid" "talk" "telnet" "tftpd-hpa"
   "vsftpd" "xinetd" "xserver-common" "ypserv"
@@ -60,11 +60,11 @@ declare -a stig_gdm3_config_list=(
   "tktk not implemented"
 )
 
-declare -A stig_services_running=(
+declare -A stig_services_disable=(
   [points]=10
   [text]="Services are securely configured"
-  [type]=service_running
-  [list]=stig_services_remove_list
+  [type]=service_active_not
+  [list]=stig_services_disable_list
 )
 
 declare -A stig_sysctl_config=(
@@ -99,13 +99,3 @@ declare -A stig_gdm3_config=(
   [list]=stig_gdm3_config_list
 )
 
-# store the name of the array to use as a reference
-# declare -n list="${stig_checks[$key]}"
-# this is a working hack and I do not know why
-#declare -A stig_checks=(
-#  [points]=7
-#  [services]=stig_services_disabled
-#  [sysctl]=stig_sysctl_config
-#  [sshd]=stig_sshd_config
-#  [lightdm]=stig_lightdm_config
-#)
