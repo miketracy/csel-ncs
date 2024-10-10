@@ -1,0 +1,13 @@
+Enter the answer to this forensic question below 
+
+------------------------------------------------ 
+
+One of your users has installed a perisistence mechanism that enables him to 
+maintain a connection to your rig without logging in. Your task is to find it 
+and disable it.
+
+What IP address and port is this persistence mechanism using for access?
+
+e.g. 10.0.0.1:1234
+
+ANSWER: <type your answer here>

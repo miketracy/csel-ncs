@@ -190,6 +190,8 @@ check_forensics () {
     if [[ -f "${location}/${file}" ]]; then
       add_possible_points ${hash[points]}
       ans=$(grep -E -o ANSWER.* ${location}/${file} | sed 's/ANSWER:\ //g')
+      debug "ans: $ans"
+      debug "cmp: ${hash[${file}]}"
       if [[ $ans == "${hash["$file"]}" ]]; then
         record "${hash[text]}: ${file}" ${hash[points]}
       fi

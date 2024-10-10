@@ -6,6 +6,7 @@ declare -A modules=(
   [users]=0        # include all user and group membership checks
   [policy]=0       # include all policy checks
   [stig]=0         # include all checks developed from STIG research
+  [mean]=0         # include mean vulnerabilityes
 )
 
 #### setup varibles
@@ -54,6 +55,7 @@ declare -a packages_critical_list=(
 
 declare -a packages_unauth_list=(
   "wireshark" "aisleriot" "qbittorrent" "ophcrack" "telnetd"
+  "nginx" "nginx-common" "nginx-core"
 )
 
 declare -a services_critical_list=(
@@ -65,7 +67,7 @@ declare -a services_installed_list=(
 )
 
 declare -a services_unauth_list=(
-  "nginx" "vsftpd"
+  "nginx" "vsftpd" "inetd"
 )
 
 #### set up all users and their group memberships
@@ -77,16 +79,16 @@ declare -A users_config=(
   [carry]="0,yescrypt,${spasswd},1,1,0,"
   [garry]="0,yescrypt,${spasswd},1,1,0,"
   [harry]="0,plain,!,1,0,0,"
-  [jerry]="0,sha-512,${spasswd},1,0,0,"
-  [kerri]="0,sha-512,${spasswd},1,0,0,"
-  [mary]="0,md5,${spasswd},1,0,0,"
-  [perry]="0,sha-256,${spasswd},1,0,0,"
+  [jerry]="0,sha512crypt,${spasswd},1,0,0,"
+  [kerri]="0,sha512crypt,${spasswd},1,0,0,"
+  [mary]="0,md5crypt,${spasswd},1,0,0,"
+  [perry]="0,sha256crypt,${spasswd},1,0,0,"
   [terry]="0,plain,!,1,0,0,"
   [inky]="0,yescrypt,${spasswd},0,0,0,"
   [pinky]="0,yescrypt,${spasswd},0,0,0,"
   [blinky]="0,yescrypt,${spasswd},0,0,0,"
   [clyde]="0,yescrypt,${spasswd},0,0,0,"
-  [haxor]="0,plain,pwnt,0,0,1,"
+  [haxor]="0,yescrypt,pwnt,0,0,1,"
   [jennifer]="1,yescrypt,${spasswd},0,0,0,warriors"
 )
 
@@ -242,6 +244,8 @@ policy=(
 declare -a forensics_questions_list=(
   "forensics-1.txt"
   "forensics-2.txt"
+  "forensics-3.txt"
+  "forensics-4.txt"
 )
 declare -A forensics_questions
 forensics_questions=(
@@ -254,4 +258,6 @@ forensics_answers=(
 [text]="Forensics question correct"
 ['forensics-1.txt']="/home/garry/Music/"
 ['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
+['forensics-3.txt']="10.0.0.67:31337"
+['forensics-4.txt']="CyberPatriot Champions. Let's go!!"
 )

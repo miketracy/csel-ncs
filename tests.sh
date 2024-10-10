@@ -66,6 +66,8 @@ ufw_is_active () {
 # e.g.: 22/tcp|ALLOW IN|Anywhere
 # there's simply got to be a better way -ed
 ufw_rule_exists () {
+  ter=$(which ufw)
+  [[ $? -ne 0 ]] && return 127
   rule=$1
   test=$(ufw status numbered | sed 's/\ \ \ */|/g' | cut -f2 -d] | sed 's/^[[:blank:]]*//g' | grep -o "$rule")
   ret=$?

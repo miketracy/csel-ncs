@@ -11,26 +11,6 @@ check_root_login () {
   [[ $? -eq 0 ]] && record "Interactive login for root disabled" $points
 }
 
-# check for secure permissions in /home/
-check_home_perms () {
-  points=2
-  add_possible_points $points
-  ret=$(ls -l /home/ | grep -e total -e ^drwxr-x--- -v | wc -l)
-  [[ "$ret" -eq 0 ]] && record "Permissions in /home/ are secure" $points
-}
-
-# special case
-# check for any non $y$ algos in /etc/shadow
-# make sure users are all chage -d 0
-check_insecure_passwd_algos () {
-  debug "NOT IMPLEMENTED"
-  return 127
-  points=2
-  add_possible_points $points
-  ret=$(cat /etc/shadow | cut -f2 -d: | grep -e '\!$' -e '*$' -e '^\$y\$' -v | wc -l)
-  [[ "$ret" -eq 0 ]] && record "Permissions in /home/ are secure" $points
-}
-
 # special case
 check_shadow_only () {
   points=6
@@ -61,6 +41,8 @@ check_fw_rules () {
 check_ufw_enabled () {
   declare -n hash=policy
   add_possible_points ${hash[points]}
+  ter=$(which ufw)
+  [[ $? -ne 0 ]] && return 127
   val=$(ufw status | grep -E -o "Status: active")
   [[ $val == "Status: active" ]] && record "${hash[fwactive]}" ${hash[points]}
 }

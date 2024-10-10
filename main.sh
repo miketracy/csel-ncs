@@ -15,6 +15,7 @@ debug=0
 
 source ./scoring.sh
 source ./scoring_policy.sh
+source ./scoring_mean.sh
 source ./scoring_stig.sh
 source ./config.sh
 source ./config_policy.sh
@@ -80,9 +81,16 @@ if [[ ${modules[policy]} -eq 0 ]]; then
     "check_pwquality"
     "check_pwnullok"
     "check_ssh_root_login"         # sshd_config PermitRoot...
-    "check_insecure_passwd_algos"  # tktk algos in /etc/shadow are all $y$ or chage -d 0
-    "check_root_login"             # tktk make sure root is usermod \! and passwd -l
+    "check_root_login"             # make sure root is usermod \! and passwd -l
+  )
+fi
+
+if [[ ${modules[mean]} -eq 0 ]]; then
+  modules_main+=(
     "check_home_perms"             # tktk check secure permissions in /home/
+    "check_insecure_passwd_algos"  # tktk algos in /etc/shadow are all $y$ or chage -d 0
+    "check_suid_files"             # tktk check for suid executables
+    "check_reverse_shell"
   )
 fi
 
@@ -100,7 +108,7 @@ check_modules () {
 
 main () {
   for module in "${modules_main[@]}"; do
-    echo "$module"
+    debug "$module"
     debug "RUNNING $module"
     $module
   done
@@ -112,7 +120,7 @@ if [[ "$SUDO_USER" != "" ]]; then
   debug "checking modules"
   check_modules
 else
-  debug "not checking modules"
+  debug=1
 fi
 
 main

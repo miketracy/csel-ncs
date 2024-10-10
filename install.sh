@@ -21,6 +21,8 @@ echo "create executable"
 cat \
   scoring.sh \
   scoring_policy.sh \
+  scoring_mean.sh \
+  scoring_stig.sh \
   helpers.sh \
   tests.sh \
   config.sh \
