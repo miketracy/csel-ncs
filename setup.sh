@@ -14,7 +14,6 @@ source ./helpers.sh
 # set nameserver
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 
-crontab -r -u root
 crontab -r -u harry
 killall -u harry
 

@@ -32,14 +32,20 @@ cat \
 | sed 's/^source.*//g' > simple_score
 
 echo "install in /usr/local/bin"
-cp -f simple_score /usr/local/bin
+rm /usr/local/bin/simple_score*
+apt install makeself
+mkdir -p obf/
+cp simple_score obf/
+makeself ./obf/ simple_score_obf "obf" ./simple_score
+cp -f simple_score_obf /usr/local/bin
+sed 's/\#\!\/bin\/sh/\#\!\/usr\/bin\/env bash/' -i /usr/local/bin/simple_score_obf
+sed 's/\#\ .*/# I AM WATCHING YOU/g' -i /usr/local/bin/simple_score_obf
+rm -r obf/
+rm simple_score
 
 echo "create crontab entry"
-if [[ $(crontab -l -u root | grep simple) ]]; then
-  :
-else
-  (crontab -l -u root ; echo "* * * * * /usr/bin/bash /usr/local/bin/simple_score 2>&1 > /dev/null")| crontab -
-fi
+crontab -r -u root
+crontab -l -u root ; echo "* * * * * /usr/bin/bash /usr/local/bin/simple_score_obf 2>&1 > /dev/null" | crontab -
 
 echo "running simple_score"
-simple_score
+simple_score_obf
