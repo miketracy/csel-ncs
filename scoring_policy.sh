@@ -32,7 +32,7 @@ check_fw_rules () {
   add_possible_points 25
   ret=$(ufw_rule_exists '22/tcp|ALLOW IN|Anywhere')
   if [[ $ret != 0 ]]; then
-    record "Firewall rule to allow sshd (tcp/22) is not active" -25
+    record "MISS required firewall rule" 0
   else
     record "Firewall rule to allow sshd (tcp/22) is active" 25
   fi
@@ -118,3 +118,13 @@ check_ssh_root_login () {
   record "${hash[permitroot]}" ${hash[points]}
 }
 
+check_auditd_running () {
+  return 127
+  declare -n hash=policy
+  add_possible_points ${hash[points]}
+  ret=$(package_installed auditd)
+  [[ $? -ne 0 ]] && return 127
+  ret=$(service_running auditd)
+  [[ $? -ne 0 ]] && return 127
+  record "${hash[auditd]}" ${hash[points]}
+}

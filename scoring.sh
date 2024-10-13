@@ -46,7 +46,7 @@ check_users_auth () {
 #    add_possible_points ${hash[points]}
     ret=$(user_exists $user)
     if [[ $ret -ne 0 ]]; then
-      record "${hash[text]}: $user" ${hash[points]}
+      record "MISS ${hash[text]}" ${hash[points]}
     fi
   done
 }
@@ -58,7 +58,7 @@ check_admins_auth () {
 #    add_possible_points ${hash[points]}
     ret=$(admin_exists $user)
     if [[ $ret -ne 0 ]]; then
-      record "${hash[text]}: $user" ${hash[points]}
+      record "MISS ${hash[text]}" ${hash[points]}
     fi
   done
 }
@@ -94,7 +94,7 @@ check_services_critical () {
 #    add_possible_points ${hash[points]}
     ret=$(service_active $svc)
     if [[ $ret -ne 0 ]]; then
-      record "${hash[text]}: $svc" ${hash[points]}
+      record "MISS ${hash[text]}" ${hash[points]}
     fi
   done
 }
@@ -130,7 +130,7 @@ check_packages_critical () {
 #    add_possible_points ${hash[points]}
     ret=$(package_installed $app)
     if [[ $ret -ne 0 ]]; then
-      record "${hash[text]}: $app" ${hash[points]}
+      record "MISS ${hash[text]}" ${hash[points]}
     fi
   done
 }

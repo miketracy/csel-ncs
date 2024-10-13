@@ -3,6 +3,7 @@
 #    forensics questions and system updates run by default
 declare -A modules=(
   [negative]=0     # include negative points
+  [defaults]=0     # defaults should always be 0
   [users]=0        # include all user and group membership checks
   [policy]=0       # include all policy checks
   [stig]=0         # include all checks developed from STIG research
@@ -42,15 +43,16 @@ declare -a groups_create_list=(
 #### packages and services
 #
 declare -a packages_upgrade_list=(
-  "firefox" "thunderbird" "ufw" "openssh-server"
+  "vivaldi-stable" "thunderbird" "ufw"
 )
 
 declare -a packages_install_list=(
-  "ruby" "x2goserver" "libpam-cracklib" "clamav"
+  "ruby" "x2goserver" "libpam-cracklib"
+  "clamav" "aide" "auditd"
 )
 
 declare -a packages_critical_list=(
-  "openssh-server" "ufw" "auditd"
+  "openssh-server"
 )
 
 declare -a packages_unauth_list=(
@@ -59,7 +61,7 @@ declare -a packages_unauth_list=(
 )
 
 declare -a services_critical_list=(
-  "sshd"
+  "sshd" "x2goserver"
 )
 
 declare -a services_installed_list=(
@@ -67,7 +69,7 @@ declare -a services_installed_list=(
 )
 
 declare -a services_unauth_list=(
-  "nginx" "vsftpd" "inetd"
+  "nginx" "vsftpd"
 )
 
 #### set up all users and their group memberships
@@ -99,7 +101,7 @@ declare -a password_change_list=(
   "larry"
 )
 declare -A password_change=(
-  [points]=3
+  [points]=5
   [type]=password_is
   [list]=password_change_list
   [text]="Insecure password has been changed"
@@ -109,7 +111,7 @@ declare -a users_in_group_list=(
   "jennifer" "barry"
 )
 declare -A users_in_group=(
-  [points]=3
+  [points]=2
   [type]=user_in_group
   [name]="warriors"
   [list]=users_in_group_list
@@ -122,7 +124,7 @@ declare -a contraband_files_list=(
   "some-song.mp3"
 )
 declare -A contraband_files=(
-  [points]=3
+  [points]=4
   [type]=file_exists
   [location]="/home/garry/Music/"
   [files]=contraband_files_list
@@ -137,7 +139,7 @@ declare -A admins_auth=(
 )
 
 declare -A admins_unauth=(
-  [points]=3
+  [points]=5
   [type]=admin_exists
   [list]=admins_unauth_list
   [text]="Unauthorized administrator has been removed"
@@ -155,14 +157,14 @@ declare -A users_auth=(
 )
 
 declare -A users_unauth=(
-  [points]=3
+  [points]=4
   [type]=user_exists
   [list]=users_unauth_list
   [text]="Unauthorized user has been removed"
 )
 
 declare -A groups_create=(
-  [points]=3
+  [points]=2
   [type]=group_exists
   [list]=groups_create_list
   [text]="Required group has been created"
@@ -171,31 +173,31 @@ declare -A groups_create=(
 #### files, apps and services
 
 declare -A packages_upgrade=(
-  [points]=3
+  [points]=2
   [type]=package_upgradable
   [list]=packages_upgrade_list
   [text]="Package has been updated"
 )
 
 declare -A packages_installed=(
-  [points]=3
+  [points]=2
   [type]=package_installed
   [list]=packages_install_list
   [text]="Required package has been installed"
 )
 
 declare -A packages_unauth=(
-  [points]=3
+  [points]=5
   [type]=package_installed_not
   [list]=packages_unauth_list
-  [text]="Unauthorized application has been removed"
+  [text]="Unauthorized package has been removed"
 )
 
 declare -A packages_critical=(
   [points]=-10
   [type]=package_installed_not
   [list]=packages_critical_list
-  [text]="Critical application has been removed"
+  [text]="Critical package has been removed"
 )
 
 #tktk
@@ -225,7 +227,7 @@ declare -A services_installed=(
 #    tktk refactor
 declare -A policy
 policy=(
-  [points]=3
+  [points]=7
   [updates]="System updates are current"
   [pwage]="A secure password age exists"
   [pwquality]="Password quality has been configured"
@@ -234,7 +236,7 @@ policy=(
   [permitroot]="Root logins via ssh have been disabled"
   [pwnullok]="Null password logins are disabled"
   [fwactive]="UFW firewall is enabled and running"
-  [auditd]="auditd is enabled and running"
+#  [auditd]="auditd is enabled and running"
 )
 
 #### forensics questions

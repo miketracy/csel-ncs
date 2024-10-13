@@ -4,6 +4,12 @@
 
 There isn't one.
 
+### DON'T CHEAT
+
+It's easy to run through the scoring script to find the answers.
+
+**don't do it**
+
 ### FORENSICS QUESTIONS
 
 If there are "Forensics Questions" on your Desktop, you will receive 
@@ -35,17 +41,18 @@ operating systems because you love to tinker. You run Mint 21. Your display
 manager is lightdm and should remain lightdm. All other display managers 
 should find their way to the bit-bucket.
 
-Choosy hackers choose Opera as their browser. You, however, use Firefox as 
-your default browser as a small rebellion. It should be installed using 
-Mozilla's Personal Package Archive (PPA). No SNAP packages. Not now. Not 
-ever. You also use Thunderbird for email. Your therapist obviously worries 
-about this choice but hey, you're a rebel right?
+Choosy hackers choose Firefox (or Chrome, Chromium, Opera) as their browser. 
+You, being the maverick you are, use Vivaldi as your default browser as a 
+small rebellion. It should be installed using vivaldi.org's personal package 
+archive (PPA). It should also be the only browser present on your rig. No 
+SNAP packages. Not now. Not ever. You also use Thunderbird for email. Your 
+therapist obviously worries about this choice but hey, you're a rebel right?
 
 Make sure things are up-to-date so you don't get haxored.
 
-You run a firewall. Again so you don't get haxored. You chose UFW. Remember 
-to configure UFW correctly and include an incoming allow rule for sshd 
-(tcp/22).
+You run a firewall. Again, so you don't get haxored. You chose UFW. 
+Remember to configure UFW correctly and include an incoming allow rule 
+for sshd (tcp/22).
 
 No root logins. That would be bad. Make your administrator buddies use 
 ```sudo```.

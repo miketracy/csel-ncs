@@ -11,7 +11,7 @@ fi
 declare -a results
 total_points=0
 possible_points=0
-debug=0
+debug=1
 
 source ./scoring.sh
 source ./scoring_policy.sh
@@ -27,12 +27,16 @@ record () {
   txt=$1
   points=$2
   debug "$1 -- $2"
-  if [[ $points -lt 0 ]]; then
+  if [[ $points -lt 1 ]]; then
     style='style="color:darkred"'
   else
     style='style="color:black"'
   fi
-  results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${points} points</span><br />")
+  if [[ $debug -eq 0 ]]; then
+    results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${points} points</span><br />")
+  else
+    results+=("<span ${style}>${txt} -- ${points} points</span><br />")
+  fi
   ((total_points += $points))
 }
 
@@ -49,15 +53,17 @@ if [[ ${modules[negative]} -eq 0 ]]; then
 fi
 
 # default modules
-modules_main+=(
-  "check_forensics"
-  "check_updates"
-  "check_services_unauth"
-  "check_services_installed"
-  "check_packages_upgrade"
-  "check_packages_installed"
-  "check_packages_unauth"
-)
+if [[ ${modules[defaults]} -eq 0 ]]; then
+  modules_main+=(
+    "check_forensics"
+    "check_updates"
+    "check_services_unauth"
+    "check_services_installed"
+    "check_packages_upgrade"
+    "check_packages_installed"
+    "check_packages_unauth"
+  )
+fi
 
 if [[ ${modules[users]} -eq 0 ]]; then
 # user and group membership points
@@ -72,6 +78,7 @@ fi
 
 if [[ ${modules[policy]} -eq 0 ]]; then
   modules_main+=(
+    "check_auditd_running"
     "check_shadow_only"            # check users in /etc/shadow not in /etc/passwd
     "check_contraband"             # music/video files in /home/
     "check_ufw_enabled"
@@ -87,10 +94,11 @@ fi
 
 if [[ ${modules[mean]} -eq 0 ]]; then
   modules_main+=(
-    "check_home_perms"             # tktk check secure permissions in /home/
+    "check_home_perms"             # check secure permissions in /home/
+    "check_world_writable"         # check world writable files set in setup.sh
+    "check_reverse_shell"          # check crontab entry for reverse shell (u:harry)
+    "check_suid_files"             # check for suid executables set in setup.sh
     "check_insecure_passwd_algos"  # tktk algos in /etc/shadow are all $y$ or chage -d 0
-    "check_suid_files"             # tktk check for suid executables
-    "check_reverse_shell"
   )
 fi
 
@@ -118,7 +126,7 @@ main () {
 
 if [[ "$SUDO_USER" != "" ]]; then
   debug "checking modules"
-  check_modules
+#  check_modules
 else
   debug=1
 fi

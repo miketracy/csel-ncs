@@ -84,6 +84,7 @@ configure_users () {
     fi
     userdel -r $user
     rm -rf /home/$user
+    rm /var/mail/$user
     if [[ $creat == 0 ]]; then
       debug "creating $user"
       delgroup $user
