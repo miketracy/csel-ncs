@@ -11,7 +11,7 @@ fi
 declare -a results
 total_points=0
 possible_points=0
-debug=1
+debug=0
 
 source ./scoring.sh
 source ./scoring_policy.sh
@@ -19,26 +19,10 @@ source ./scoring_mean.sh
 source ./scoring_stig.sh
 source ./config.sh
 source ./config_policy.sh
+source ./config_mean.sh
 source ./config_stig.sh
 source ./helpers.sh
 source ./tests.sh
-
-record () {
-  txt=$1
-  points=$2
-  debug "$1 -- $2"
-  if [[ $points -lt 1 ]]; then
-    style='style="color:darkred"'
-  else
-    style='style="color:black"'
-  fi
-  if [[ $debug -eq 0 ]]; then
-    results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${points} points</span><br />")
-  else
-    results+=("<span ${style}>${txt} -- ${points} points</span><br />")
-  fi
-  ((total_points += $points))
-}
 
 declare -a modules_main
 if [[ ${modules[negative]} -eq 0 ]]; then
@@ -78,6 +62,7 @@ fi
 
 if [[ ${modules[policy]} -eq 0 ]]; then
   modules_main+=(
+    "check_mint_updates"
     "check_auditd_running"
     "check_shadow_only"            # check users in /etc/shadow not in /etc/passwd
     "check_contraband"             # music/video files in /home/
@@ -94,11 +79,12 @@ fi
 
 if [[ ${modules[mean]} -eq 0 ]]; then
   modules_main+=(
+    "check_shadow_insecure_hash"
+    "check_cron_allow"
     "check_home_perms"             # check secure permissions in /home/
     "check_world_writable"         # check world writable files set in setup.sh
     "check_reverse_shell"          # check crontab entry for reverse shell (u:harry)
     "check_suid_files"             # check for suid executables set in setup.sh
-    "check_insecure_passwd_algos"  # tktk algos in /etc/shadow are all $y$ or chage -d 0
   )
 fi
 
@@ -124,11 +110,15 @@ main () {
   debug "total points: ${total_points}"
 }
 
-if [[ "$SUDO_USER" != "" ]]; then
-  debug "checking modules"
-#  check_modules
-else
+if [[ "$SUDO_USER" == "" ]]; then
   debug=1
+else
+  if [[ "$0" =~ simple_score ]]; then
+    :
+  else
+    debug "checking modules"
+    check_modules
+  fi
 fi
 
 main

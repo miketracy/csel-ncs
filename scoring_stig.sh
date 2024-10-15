@@ -1,6 +1,4 @@
 # TODO
-source ./helpers.sh
-source ./config_stig.sh
 
 debug_check_stig () {
   [[ $debug -lt 2 ]] && return 1
@@ -15,7 +13,3 @@ debug_check_stig () {
     fi
   done
 }
-
-# TODO
-# store a reference? store the array name and try to declare -n
-debug_check_stig

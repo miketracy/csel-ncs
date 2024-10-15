@@ -14,8 +14,17 @@ source ./helpers.sh
 # set nameserver
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 
+sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled false
+mintupdate-automation upgrade disable
+systemctl stop mintupdate-automation-upgrade.timer
+
+apt install at -y
 crontab -r -u harry
 killall -u harry
+rm /etc/cron.allow
+rm /etc/cron.deny
+rm /etc/at.allow
+rm /etc/at.deny
 
 # set up users
 configure_users
@@ -96,6 +105,7 @@ cp -f orig/common-* /etc/pam.d/
 cp -f orig/login.defs /etc/
 cp -f orig/sysctl.conf /etc/
 cp -f orig/lightdm.conf /etc/lightdm/
+cp -f orig/sshd_config /etc/ssh/
 
 echo "install forensics questions"
 declare -n list="${forensics_questions[questions]}"

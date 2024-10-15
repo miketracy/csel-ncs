@@ -2,6 +2,26 @@
 #### policy
 #
 
+# check mint updates
+check_mint_updates () {
+  points=3
+  add_possible_points $points
+  val=$(su campy -c "gsettings get com.linuxmint.updates refresh-schedule-enabled")
+  debug $val
+  if [[ "$val" == "true" ]]; then
+    record "mint updates refresh schedule enabled" $points
+  else
+    record "MISS update configuration" 0
+  fi
+  add_possible_points $points
+  val=$(service_active mintupdate-automation-upgrade.timer)
+  if [[ $val -eq 0 ]]; then
+    record "mint automatic update service running" $points
+  else
+    record "MISS update configuration" 0
+  fi
+}
+
 # check that root console login has been disabled
 # ensure root is usermod -p "!"
 check_root_login () {

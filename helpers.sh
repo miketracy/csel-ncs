@@ -5,6 +5,24 @@ debug () {
   fi
 }
 
+record () {
+  txt=$1
+  local rpoints=$2
+  debug "$1 -- $2"
+  if [[ $rpoints -lt 1 ]]; then
+    style='style="color:darkred"'
+  else
+    style='style="color:black"'
+  fi
+  if [[ $debug -eq 0 ]]; then
+    results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${rpoints} points</span>
+<br />")
+  else
+    results+=("<span ${style}>${txt} -- ${rpoints} points</span><br />")
+  fi
+  ((total_points += $rpoints))
+}
+
 fatal () {
     echo "FATAL[${FUNCNAME[1]}] $@" >&2
     exit 127
@@ -14,7 +32,7 @@ fatal () {
 # score_location ()
 score_it () {
   local -n hash=$1
-  points="${hash[points]}"
+  local rpoints="${hash[points]}"
   type=$(echo "${hash[type]}" | sed 's/_not//; t; q1')
   not=$?
   if [[ -v "hash[file]" ]]; then
@@ -22,7 +40,7 @@ score_it () {
 #    ret=$($type "${hash[file]" "${hash[list]")
 #  else
   fi
-  debug "${FUNCNAME[1]} $points $type $not"
+  debug "${FUNCNAME[1]} $rpoints $type $not"
 }
 
 # pass: array_name [delimiter] csv
@@ -37,6 +55,25 @@ csv2arr () {
   fi
   debug "csv2arr[${FUNCNAME[1]}] $retarr delimiter = ${delimiter} line = ${line}"
   readarray -d $delimiter -t retarr < <(printf $line) # use printf to prevent trailing \n
+}
+
+get_shadow_entry () {
+  user=$1
+  local -n retent=entry
+  local -a retarr
+  readarray -d : -t retarr < <(getent shadow $user)
+  retent[user]=${retarr[0]}
+  retent[password]=${retarr[1]}
+  retent[algo]=$(echo "${retent[password]}" | sed 's/^\(\$.\$\).*/\1/')
+  retent[salt]=$(echo "${retent[password]}" | sed 's/\$[^\$]*$//')
+  retent[hash]=${retent[password]##*$}
+  retent[dlchange]=${retarr[2]}
+  retent[minage]=${retarr[3]}
+  retent[maxage]=${retarr[4]}
+  retent[pwarn]=${retarr[5]}
+  retent[pwinac]=${retarr[6]}
+  retent[acctexp]=${retarr[7]}
+  retent[reserved]=${retarr[8]}
 }
 
 # pass $username
@@ -58,9 +95,9 @@ get_user_entry () {
 }
 
 add_possible_points () {
-  points=$1
-  debug "POSSIBLE: [${FUNCNAME[1]}] -- $points points"
-  [[ points -ge 0 ]] && ((possible_points += points))
+  local rpoints=$1
+  debug "POSSIBLE: [${FUNCNAME[1]}] -- $rpoints points"
+  [[ rpoints -ge 0 ]] && ((possible_points += $rpoints))
 }
 
 # configure users in setup
@@ -99,7 +136,6 @@ configure_users () {
       [[ $is_admin -eq 1 ]] && gpasswd -a $user sudo
       if [[ $sonly -eq 1 ]]; then
         sed -i "/^${user}.*/d" /etc/passwd
-        debug "################################# $user $?"
       fi
     else
       debug "${FUNCNAME[1]} SKIPPING ${user}"
@@ -117,8 +153,8 @@ footer="
   </html>"
 
 write_header () {
-  file=$1
-  points=$2
+  local file=$1
+  local rpoints=$2
   header="
   <!doctype html>
      <html>
@@ -128,9 +164,9 @@ write_header () {
       </head>
       <body style='font-family:monospace;font-size:12pt;background-color:lightgray;'>
         <div align='center'><h2>Super Simple Score Report</h2></div>
-        <div align='center'><h3>Your score: ${2} out of ${possible_points}</h3></div>
+        <div align='center'><h3>Your score: ${rpoints} out of ${possible_points}</h3></div>
         <div align='center'>$(date)</div><hr /><br />"
-  echo $header > $1
+  echo $header > $file
 }
 write_html () {
   file="${location}/scoring_report.html"
