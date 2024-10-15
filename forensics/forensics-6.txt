@@ -1,0 +1,7 @@
+Enter the answer to this forensic question below 
+
+------------------------------------------------ 
+
+The rootkit was hiding a file containing a secret password. What is that password?
+
+ANSWER: <type your answer here>

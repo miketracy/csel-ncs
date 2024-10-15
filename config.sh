@@ -248,6 +248,8 @@ declare -a forensics_questions_list=(
   "forensics-2.txt"
   "forensics-3.txt"
   "forensics-4.txt"
+  "forensics-5.txt"
+  "forensics-6.txt"
 )
 declare -A forensics_questions
 forensics_questions=(
@@ -262,4 +264,6 @@ forensics_answers=(
 ['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
 ['forensics-3.txt']="10.0.0.67:31337"
 ['forensics-4.txt']="CyberPatriot Champions. Let's go!!"
+['forensics-5.txt']="/var/nonofind/"
+['forensics-6.txt']="1ts4m3M4r10"
 )

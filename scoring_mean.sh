@@ -1,3 +1,16 @@
+# check for presence of rootkit and its hidden directory
+check_rootkit () {
+  local lpoints=12
+  add_possible_points $lpoints
+  ret=$(lsmod | grep cpnofind)
+  if [[ $? == 0 ]]; then
+    record "MISS there's a rootkit hiding a directory somewhere" 0
+    return 127
+  fi
+  record "rootkit has been disabled" $lpoints
+}
+
+
 # check insecure password algorithms
 # you need to expire these passwords
 # so that they are changed on next login
