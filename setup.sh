@@ -21,12 +21,15 @@ for file in "${list[@]}"; do
 done
 
 # install rootkit
-(cd orig/rootkit/ && make)
+# we aren't trying to hid this so install it so we can
+# find it with modinfo
+#find /lib/modules/ -type f -name cpnofind.ko | xargs rm
+(cd orig/rootkit/ && make && make install && depmod -A)
 mkdir -p /var/nonofind/
 echo "password_value=1ts4m3M4r10" > /var/nonofind/secret_password.txt
 insmod orig/rootkit/cpnofind.ko
 (cd orig/rootkit && make clean)
-
+exit
 # set nameserver
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 

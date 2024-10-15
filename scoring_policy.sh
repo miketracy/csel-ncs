@@ -6,7 +6,8 @@
 check_mint_updates () {
   points=3
   add_possible_points $points
-  val=$(su campy -c "gsettings get com.linuxmint.updates refresh-schedule-enabled")
+  val=$(sudo -iu campy dbus-launch gsettings get com.linuxmint.updates refresh-schedule-enabled)
+#  val=$(su campy -c "gsettings get com.linuxmint.updates refresh-schedule-enabled 2> /dev/null")
   debug $val
   if [[ "$val" == "true" ]]; then
     record "mint updates refresh schedule enabled" $points
@@ -33,8 +34,8 @@ check_root_login () {
 
 # special case
 check_shadow_only () {
-  points=6
-  add_possible_points $points
+  local lpoints=6
+  add_possible_points $lpoints
   ret=$(\
     diff \
     <(cat /etc/passwd | cut -f1 -d: | sort) \
@@ -42,19 +43,20 @@ check_shadow_only () {
   )
   ret=$?
   if [[ $ret == 0 ]]; then
-    record "All users in /etc/shadow appear in /etc/passwd" $points
+    record "All users in /etc/shadow appear in /etc/passwd" $lpoints
   fi
 }
 
 # special case for ssh only. we could expand this later.
 check_fw_rules () {
 #omg this is dumb holy crap
-  add_possible_points 25
+  local lpoints=9
+  add_possible_points $lpoints
   ret=$(ufw_rule_exists '22/tcp|ALLOW IN|Anywhere')
   if [[ $ret != 0 ]]; then
     record "MISS required firewall rule" 0
   else
-    record "Firewall rule to allow sshd (tcp/22) is active" 25
+    record "Firewall rule to allow sshd (tcp/22) is active" $lpoints
   fi
 }
 

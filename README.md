@@ -5,6 +5,16 @@ This is under construction. I will update this as I go.
 This scoring engine has been tested against Mint21. I expect it will work 
 against any linux distribution. YMMV.
 
+## the scenario
+
+Build the scenario by running ```sudo ./setup.sh```
+
+The scenario contains some interesting real-world but nerfed vulnerabilities. 
+They can be reversed from the check_* functions. You can run ```sudo 
+./main.sh``` with debugging turned on to see a list of POSSIBLE points. The 
+forensics questions should help lead you to answers for some of the more 
+complex findings.
+
 ## setup
 
 Create a new mint21 image from the .iso (use "Ubuntu" when VMWare asks you for 
