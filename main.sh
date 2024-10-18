@@ -11,7 +11,10 @@ fi
 declare -a results
 total_points=0
 possible_points=0
-debug=0
+total_vulns=0
+possible_vulns=0
+debug=1
+version="2024.10.15.1"
 
 source ./scoring.sh
 source ./scoring_policy.sh
@@ -90,7 +93,12 @@ if [[ ${modules[mean]} -eq 0 ]]; then
 fi
 
 if [[ ${modules[stig]} -eq 0 ]]; then
-  : # tktk
+  modules_main+=(
+    "check_stig_sshd_config"
+    "check_stig_sysctl_config"
+    "check_stig_lightdm_config"
+    "check_stig_inetd_masked"
+  )
 fi
 
 check_modules () {

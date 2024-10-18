@@ -89,17 +89,21 @@ has_value () {
   key=$2
   compare=$3
   value=$4
-  debug "$file $key $compare $value"
+  debug "???? $file $key $compare $value"
 #  rval=$(grep -E -o -e ${key}=[0-9]+ -e ${key}\s+[0-9]+ $file) # | cut -f2 -d=)
 #  rval=$(grep -E -o ${key}\[\=\s]+\[0-9\]+ $file)
-  rval=$(grep -E -o "${key}(\s+|=)+[0-9]+" $file)
+  rval=$(grep -E -o "${key}(\s+|=)+[0-9a-zA-Z]+" $file)
+#  rval=$(grep -E -o "${key}(\s+|=)+[0-9]+" $file)
+  rret=$?
   [[ "$?" -ne 0 ]] && return 127
-  debug "[$?] orig $rval"
-  rval=$(echo $rval | tr -s " " | sed 's/[[:blank:]]/=/')
+  debug "[$rret] orig $rval"
+  rval=$(echo $rval | sed 's/\s*=\s*/=/')                  # spaces around equal
+  rval=$(echo $rval | tr -s " " | sed 's/[[:blank:]]/=/')  # space to equal
   debug "spaces to = $rval"
   rval=$(echo $rval | cut -f2 -d=)
-  debug "value $rval"
+  debug "$value $compare $rval"
   qret=1
+  # add string compare
   case $compare in
     "lt") [[ $rval -lt $value ]] && qret=0;;
     "gt") [[ $rval -gt $value ]] && qret=0;;
@@ -107,6 +111,8 @@ has_value () {
     "ge") [[ $rval -ge $value ]] && qret=0;;
     "eq") [[ $rval -eq $value ]] && qret=0;;
     "ne") [[ $rval -ne $value ]] && qret=0;;
+    "!=") [[ "$rval" != "$value" ]] && qret=0;;
+    "==") [[ "$rval" == "$value" ]] && qret=0;;
     *) qret=127;;
   esac
   debug "$file $key $compare $value $qret"

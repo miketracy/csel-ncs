@@ -10,9 +10,11 @@ record () {
   local rpoints=$2
   debug "$1 -- $2"
   if [[ $rpoints -lt 1 ]]; then
+#    ((total_vulns += -1))
     style='style="color:darkred"'
   else
     style='style="color:black"'
+    ((total_vulns += 1))
   fi
   if [[ $debug -eq 0 ]]; then
     results+=("<span ${style}>[${FUNCNAME[1]}] ${txt} -- ${rpoints} points</span>
@@ -97,7 +99,10 @@ get_user_entry () {
 add_possible_points () {
   local rpoints=$1
   debug "POSSIBLE: [${FUNCNAME[1]}] -- $rpoints points"
-  [[ rpoints -ge 0 ]] && ((possible_points += $rpoints))
+  if [[ rpoints -ge 0 ]]; then
+    ((possible_points += $rpoints))
+    ((possible_vulns += 1))
+  fi
 }
 
 # configure users in setup
@@ -155,6 +160,7 @@ footer="
 write_header () {
   local file=$1
   local rpoints=$2
+  local rvulns=$3
   header="
   <!doctype html>
      <html>
@@ -164,13 +170,13 @@ write_header () {
       </head>
       <body style='font-family:monospace;font-size:12pt;background-color:lightgray;'>
         <div align='center'><h2>Super Simple Score Report</h2></div>
-        <div align='center'><h3>Your score: ${rpoints} out of ${possible_points}</h3></div>
+        <div align='center'><h3>${rvulns} of ${possible_vulns} found for ${rpoints} of ${possible_points} points</h3></div>
         <div align='center'>$(date)</div><hr /><br />"
   echo $header > $file
 }
 write_html () {
   file="${location}/scoring_report.html"
-  write_header "${file}" "${total_points}"
+  write_header "${file}" "${total_points}" "${total_vulns}"
   lines=("$@")
   for line in "${lines[@]}"; do
     echo $line >> $file

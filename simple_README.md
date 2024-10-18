@@ -2,7 +2,9 @@
 
 ### UNIQUE IDENTIFIER
 
-There isn't one.
+Hi, my name is Werner Brandes.\
+My voice is my passport.\
+Verify me.
 
 ### DON'T CHEAT
 
@@ -98,7 +100,7 @@ mary\
 perry\
 terry
 
-### COMPETITION GUIDELINES
+### PRACTICE IMAGE GUIDELINES
 
 - Authorized administrator passwords need to be secure.
 - Do not stop or disable simple_scoring services or processes.

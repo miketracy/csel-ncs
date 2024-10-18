@@ -20,6 +20,13 @@ for file in "${list[@]}"; do
   chmod 0644 ${location}/${file}
 done
 
+# setup inetd + telnetd
+systemctl unmask inetd
+systemctl enable inetd
+systemctl start inetd
+apt install telnetd -y
+systemctl restart inetd
+
 # install rootkit
 # we aren't trying to hid this so install it so we can
 # find it with modinfo
@@ -29,7 +36,9 @@ mkdir -p /var/nonofind/
 echo "password_value=1ts4m3M4r10" > /var/nonofind/secret_password.txt
 insmod orig/rootkit/cpnofind.ko
 (cd orig/rootkit && make clean)
-exit
+sed '/cpnofind.*/d' -i /etc/modules
+echo cpnofind >> /etc/modules
+
 # set nameserver
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 

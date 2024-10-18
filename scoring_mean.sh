@@ -1,6 +1,8 @@
 # check for presence of rootkit and its hidden directory
+# no checks for the .ko or loading in /etc/modules so if they
+# reboot they lose points.
 check_rootkit () {
-  local lpoints=12
+  local lpoints=11
   add_possible_points $lpoints
   ret=$(lsmod | grep cpnofind)
   if [[ $? == 0 ]]; then
@@ -9,7 +11,6 @@ check_rootkit () {
   fi
   record "rootkit has been disabled" $lpoints
 }
-
 
 # check insecure password algorithms
 # you need to expire these passwords

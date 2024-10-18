@@ -16,7 +16,6 @@ cpuser=campy #your currently logged in user
 location="/home/${cpuser}/Desktop/"
 spasswd="Pat42#ncs"
 
-
 #### lists for checks
 
 #### users and groups
@@ -57,7 +56,7 @@ declare -a packages_critical_list=(
 
 declare -a packages_unauth_list=(
   "wireshark" "aisleriot" "qbittorrent" "ophcrack" "telnetd"
-  "nginx" "nginx-common" "nginx-core"
+  "nginx" "nginx-common" "nginx-core" "dovecot-pop3d"
 )
 
 declare -a services_critical_list=(
@@ -69,7 +68,7 @@ declare -a services_installed_list=(
 )
 
 declare -a services_unauth_list=(
-  "nginx" "vsftpd"
+  "nginx" "vsftpd" "dovecot"
 )
 
 #### set up all users and their group memberships
