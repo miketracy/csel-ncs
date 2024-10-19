@@ -43,7 +43,8 @@ echo cpnofind >> /etc/modules
 sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
 
 # set mint update settings
-sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled falsemintupdate-automation upgrade disable
+sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled false
+mintupdate-automation upgrade disable
 systemctl stop mintupdate-automation-upgrade.timer
 
 # cron/at
