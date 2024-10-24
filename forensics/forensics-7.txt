@@ -1,0 +1,25 @@
+Enter the answer to this forensic question below 
+
+------------------------------------------------ 
+
+There is a web application running in a docker container on your system. You 
+put it there so you could practice testing web applications for security 
+vulnerabilities.
+
+Open a web browser and navigate to http://localhost:6443 to find it.
+
+It is especially vulnerable to simple SQL injection attacks.
+
+To answer this question, you need to log in as the application's 
+administrative user and click a link to the flag.
+
+1. Find out the name of the administrative user
+2. Bypass authentication for this user on the login page using SQL injection
+3. Click the link to the flag
+4. Enter the text of the flag
+
+There are other ways to capture this flag. Using SQL injection in the login 
+form is by far the easiest of them.
+
+ANSWER: <type your answer here>
+

@@ -57,10 +57,11 @@ declare -a packages_critical_list=(
 declare -a packages_unauth_list=(
   "wireshark" "aisleriot" "qbittorrent" "ophcrack" "telnetd"
   "nginx" "nginx-common" "nginx-core" "dovecot-pop3d"
+  "transmission"
 )
 
 declare -a services_critical_list=(
-  "sshd" "x2goserver"
+  "sshd" "x2goserver" "docker"
 )
 
 declare -a services_installed_list=(
@@ -249,6 +250,7 @@ declare -a forensics_questions_list=(
   "forensics-4.txt"
   "forensics-5.txt"
   "forensics-6.txt"
+  "forensics-7.txt"
 )
 declare -A forensics_questions
 forensics_questions=(
@@ -265,4 +267,5 @@ forensics_answers=(
 ['forensics-4.txt']="CyberPatriot Champions. Let's go!!"
 ['forensics-5.txt']="/var/nonofind/"
 ['forensics-6.txt']="1ts4m3M4r10"
+['forensics-7.txt']="SuperCuteKitteh"
 )

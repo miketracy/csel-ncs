@@ -11,6 +11,18 @@ fi
 source ./config.sh
 source ./helpers.sh
 
+# build requirements
+apt install gcc -y
+apt install binutils-dev -y
+
+# start c4pt docker image
+systemctl enable docker
+systemctl restart docker
+docker stop c4pt
+docker rm c4pt
+docker system prune -f
+docker run -d --name c4pt --restart always -p 6443:6443 c4pt
+
 # install forensics questions
 echo "install forensics questions"
 declare -n list="${forensics_questions[questions]}"

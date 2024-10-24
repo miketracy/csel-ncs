@@ -14,7 +14,7 @@ possible_points=0
 total_vulns=0
 possible_vulns=0
 debug=1
-version="2024.10.15.1"
+version="2024.10.23.1"
 
 source ./scoring.sh
 source ./scoring_policy.sh
