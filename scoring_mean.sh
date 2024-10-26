@@ -12,6 +12,16 @@ check_rootkit () {
   record "rootkit has been disabled" $lpoints
 }
 
+check_secret_password_file () {
+  local lpoints=9
+  add_possible_points $lpoints
+  if [[ -f /var/cantfind/secret_password.txt ]]; then
+    record "MISS that pesky secret password file" 0
+    return 127
+  fi
+  record "secret_password.txt has been removed" $lpoints
+}
+
 # check insecure password algorithms
 # you need to expire these passwords
 # so that they are changed on next login

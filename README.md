@@ -26,15 +26,18 @@ Log in as the user you created (ensure you have sudoers access).
 
 Run scripts using sudo to make sure you never clobber your logged in user.
 
-1. $ sudo apt install git
+1. $ sudo apt install git -y
 2. $ git clone https://github.com/miketracy/csel-ncs
 3. $ cd csel-ncs/
-4. $ sudo git install pandoc
+4. $ sudo apt install pandoc -y
 5. $ sudo ./setup.sh # this will setup the scenario that's been configured
 6. $ sudo ./install.sh
 
-You should have 2 forensics questions, a README and a scoring report on your 
+You should have forensics questions, a README and a scoring report on your 
 desktop. Run through the README tasks and you're on your own for more points.
+
+The docker container for the vulnerable web application won't work 
+building from here. I am not going to release that code publicly.
 
 ### NO CHEATING
 

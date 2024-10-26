@@ -18,6 +18,8 @@ cp -f simple_README.html ${location}
 chmod 0644 ${location}/simple_README.html
 
 echo "create executable"
+rm -f simple_score_obf
+
 cat \
   scoring.sh \
   scoring_policy.sh \

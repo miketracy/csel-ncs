@@ -83,6 +83,7 @@ fi
 if [[ ${modules[mean]} -eq 0 ]]; then
   modules_main+=(
     "check_rootkit"
+    "check_secret_password_file"
     "check_shadow_insecure_hash"
     "check_cron_allow"
     "check_home_perms"             # check secure permissions in /home/

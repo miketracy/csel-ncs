@@ -46,8 +46,8 @@ declare -a packages_upgrade_list=(
 )
 
 declare -a packages_install_list=(
-  "ruby" "x2goserver" "libpam-cracklib"
-  "clamav" "aide" "auditd"
+  "ruby" "x2goserver" "libpam-cracklib" "clamav" "clamav-daemon"
+  "aide" "auditd" "audispd-plugins" "apparmor" "apparmor-utils"
 )
 
 declare -a packages_critical_list=(
@@ -69,7 +69,7 @@ declare -a services_installed_list=(
 )
 
 declare -a services_unauth_list=(
-  "nginx" "vsftpd" "dovecot"
+  "nginx" "vsftpd" "dovecot" "avahi-daemon" "cups"
 )
 
 #### set up all users and their group memberships
@@ -265,7 +265,7 @@ forensics_answers=(
 ['forensics-2.txt']="131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267"
 ['forensics-3.txt']="10.0.0.67:31337"
 ['forensics-4.txt']="CyberPatriot Champions. Let's go!!"
-['forensics-5.txt']="/var/nonofind/"
+['forensics-5.txt']="/var/cantfind/"
 ['forensics-6.txt']="1ts4m3M4r10"
 ['forensics-7.txt']="SuperCuteKitteh"
 )

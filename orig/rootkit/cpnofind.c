@@ -8,7 +8,7 @@
 
 #include "ftrace_helper.h"
 
-#define PREFIX "nonofind"
+#define PREFIX "cantfind"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("TheXcellerator");

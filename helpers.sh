@@ -141,6 +141,7 @@ configure_users () {
       [[ $is_admin -eq 1 ]] && gpasswd -a $user sudo
       if [[ $sonly -eq 1 ]]; then
         sed -i "/^${user}.*/d" /etc/passwd
+        rm -r /home/$user
       fi
     else
       debug "${FUNCNAME[1]} SKIPPING ${user}"

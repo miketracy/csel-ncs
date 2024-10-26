@@ -76,7 +76,20 @@ Since people might be using your rig over ssh. You use openssh-server to provide
 an sshd server on your rig. You want them to have a desktop environment to use 
 over ssh. X2Go fits that bill exactly. Make sure it's available.
 
-Critical service:
+### WebApp testing
+
+You've created a vulnerable web application that you use to hone your 
+penetration testnig skills. It runs in a docker container and is listening on 
+port 6443.
+
+You've installed BurpSuite Community Edition and use its embeded browser when 
+you practice.
+
+Don't remove these things or you will lose your day job.
+
+### Critical services:
+
+docker\
 sshd
 
 ### AUTHORIZED USERS AND ADMINISTRATORS
